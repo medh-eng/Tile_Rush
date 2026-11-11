@@ -71,7 +71,7 @@ try{
   assert.ok((await page.locator('#result-stats').textContent()).includes('100%'));
   await page.screenshot({path:'test-results/04-complete.png'});check('full 64-note chart completes using real touch drag input');
   await page.getByRole('button',{name:'Play again'}).click();
-  // Force a visibility interruption using another foreground page.
+  // An interruption immediately after Play must also survive async audio startup.
   await page.evaluate(()=>window.dispatchEvent(new Event('blur')));
   await page.getByRole('heading',{name:'On pause.'}).waitFor();check('interruption pauses instead of dropping notes');
   await page.getByRole('button',{name:'Back to tracks'}).click();

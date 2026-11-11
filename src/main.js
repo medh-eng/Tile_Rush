@@ -3,7 +3,7 @@ import {Soundtrack} from './audio.js';
 import {Renderer} from './renderer.js';
 const $=id=>document.getElementById(id);
 const sound=new Soundtrack();
-let selected=TRACKS[0],run=null,renderer=null,mode='home',x=0,pointer=null,lastFrame=0,raf=0,feedbackUntil=-1,busy=false,landscapeDismissed=false,lastTime=0;
+let selected=TRACKS[0],run=null,renderer=null,mode='home',x=0,pointer=null,lastFrame=0,raf=0,feedbackUntil=-1,busy=false,landscapeDismissed=false,lastTime=0,interrupted=false;
 const keys=new Set();
 function read(key,fallback){try{return JSON.parse(localStorage.getItem(key))??fallback;}catch{return fallback;}}
 function write(key,value){try{localStorage.setItem(key,JSON.stringify(value));}catch{/* Private mode still plays. */}}
@@ -32,12 +32,12 @@ function updateHud(){
 async function start(){
   if(busy)return;busy=true;$('play').disabled=true;$('modal-primary').disabled=true;
   try{
-    cancelAnimationFrame(raf);resetPointer();x=0;run=new Run(selected);mode='starting';feedbackUntil=-1;
+    cancelAnimationFrame(raf);resetPointer();x=0;run=new Run(selected);mode='starting';interrupted=false;feedbackUntil=-1;
     $('home').hidden=true;$('game').hidden=false;$('modal').hidden=true;$('tutorial').hidden=false;
     $('game-track').textContent=selected.title.toUpperCase();$('feedback').textContent='';
     renderer ||= new Renderer($('stage'));renderer.effects=[];renderer.resize();updateHud();renderer.draw(run,-2,0);
     await sound.start(selected);lastTime=sound.time;mode='playing';lastFrame=performance.now();
-    if(document.hidden){await pause();}else{raf=requestAnimationFrame(frame);$('stage').focus({preventScroll:true});}
+    if(document.hidden||interrupted){await pause();}else{raf=requestAnimationFrame(frame);$('stage').focus({preventScroll:true});}
   }finally{busy=false;$('play').disabled=false;$('modal-primary').disabled=false;}
 }
 function frame(stamp){
@@ -72,7 +72,11 @@ async function pause(){
 }
 async function resume(){
   if(busy)return;busy=true;$('modal-primary').disabled=true;
-  try{await sound.resume();mode='playing';$('modal').hidden=true;lastFrame=performance.now();raf=requestAnimationFrame(frame);$('stage').focus({preventScroll:true});}
+  try{
+    interrupted=false;mode='resuming';await sound.resume();mode='playing';
+    if(document.hidden||interrupted){await pause();return;}
+    $('modal').hidden=true;lastFrame=performance.now();raf=requestAnimationFrame(frame);$('stage').focus({preventScroll:true});
+  }
   finally{busy=false;$('modal-primary').disabled=false;}
 }
 function finish(){
@@ -103,9 +107,14 @@ window.addEventListener('keydown',e=>{
 window.addEventListener('keyup',e=>keys.delete(e.key));
 // Keep keyboard focus within the modal; returning home/resuming restores it.
 $('modal').addEventListener('keydown',e=>{if(e.key!=='Tab')return;const first=$('modal-primary'),last=$('home-button');if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}});
-document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
-window.addEventListener('blur',()=>{resetPointer();pause();});
-window.addEventListener('pagehide',()=>{pause();});
+function interrupt(){
+  resetPointer();
+  if(mode==='starting'||mode==='resuming'){interrupted=true;return;}
+  pause();
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)interrupt();});
+window.addEventListener('blur',interrupt);
+window.addEventListener('pagehide',interrupt);
 function resize(){
   renderer?.resize();const landscape=innerWidth>innerHeight&&innerHeight<600;
   $('rotate').hidden=!landscape||landscapeDismissed;if(landscape&&!landscapeDismissed)pause();
