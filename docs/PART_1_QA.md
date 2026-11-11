@@ -3,7 +3,7 @@
 ## Checks performed
 
 - Syntax validation passes for the four runtime modules.
-- Five model tests pass: deterministic beat-aligned charts, judgement boundaries, complete 64-note run, miss termination, lower edge score and clamped input.
+- Eight automated tests pass: audio lifecycle/freeze, context reuse/mute, silent fallback, and model checks for deterministic beat-aligned charts, judgement boundaries, complete 64-note run, miss termination, lower edge score and clamped input.
 - Static build completes with no runtime dependencies.
 
 ## Browser validation

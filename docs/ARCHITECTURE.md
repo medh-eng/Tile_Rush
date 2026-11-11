@@ -10,7 +10,7 @@
 
 The chart and animation use musical elapsed time (`AudioContext.currentTime - origin`), rather than adding a constant distance on every frame. Each note is consumed exactly once. Input is relative horizontal movement clamped to the track width. Judgement compares horizontal separation at the landing beat: ≤0.10 is perfect; ≤0.26 is good; greater is a miss.
 
-Pause stops animation, freezes the audio context, cancels scheduled voices and anchors the clock to the last rendered simulation time. Resume schedules future notes from that position. This also prevents a long stalled frame from consuming several notes with an old input sample. Audio context recreation is avoided across retries. Completed/stopped voices disconnect; there is only one scheduler per session.
+Pause stops animation, freezes the audio context, cancels scheduled voices and anchors the clock to the last rendered simulation time. Resume schedules future notes from that position. This also prevents a long stalled frame from consuming several notes with an old input sample. Audio context recreation is avoided across retries. Completed/stopped voices disconnect; there is only one scheduler per session. The audio context suspends when a run stops, avoiding idle audio processing.
 
 No external music downloads, trackers or backend calls occur. Local storage contains only best scores and mute preference. Malformed or unavailable storage does not prevent play.
 

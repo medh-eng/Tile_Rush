@@ -2,7 +2,7 @@
 export class Soundtrack {
   constructor(){this.ctx=null;this.timer=null;this.nodes=new Set();this.muted=false;this.fallback=false;}
   async start(track){
-    this.stop();this.track=track;this.step=0;this.paused=false;
+    await this.stop();this.track=track;this.step=0;this.paused=false;
     const Audio=globalThis.AudioContext||globalThis.webkitAudioContext;
     try {
       if(!Audio) throw new Error('Web Audio unavailable');
@@ -50,5 +50,10 @@ export class Soundtrack {
     this.nodes.clear();this.step=Math.max(0,Math.floor(time/(60/this.track.bpm))+1);
   }
   async resume(){if(!this.paused)return;if(this.fallback)this.origin+=performance.now()/1000-this.frozen;else await this.ctx.resume();this.paused=false;}
-  stop(){clearInterval(this.timer);this.timer=null;for(const o of this.nodes){try{o.stop();}catch{}}this.nodes.clear();if(this.gain){this.gain.disconnect();this.gain=null;}}
+  async stop(){
+    clearInterval(this.timer);this.timer=null;
+    for(const o of this.nodes){try{o.stop();}catch{}}
+    this.nodes.clear();if(this.gain){this.gain.disconnect();this.gain=null;}
+    if(this.ctx?.state==='running'){try{await this.ctx.suspend();}catch{}}
+  }
 }
