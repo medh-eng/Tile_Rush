@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#0b1524">
+<meta name="description" content="Find your flow in Tile Rush. An original one-finger rhythm arcade game. Play two original tracks in your mobile browser.">
+<link rel="icon" href="./public/icon.svg" type="image/svg+xml"><link rel="stylesheet" href="./styles.css"><title>Tile Rush — Find your flow</title>
+</head>
+<body>
+<main id="app">
+<section id="home" class="screen">
+  <header class="brand-row"><a class="wordmark" href="./" aria-label="Tile Rush home"><span class="brand-icon"><i></i><i></i><i></i></span>TILE<span>RUSH</span></a><span class="edition">VOL. 01</span></header>
+  <div class="intro"><p class="eyebrow">LESS THINKING. MORE FEELING.</p><h1>Find your <em>flow.</em></h1><p>One ball. Your rhythm. A little escape.</p></div>
+  <div class="cover" aria-hidden="true">
+    <div class="cover-grid"></div><span class="orbit orbit-one"></span><span class="orbit orbit-two"></span>
+    <span class="cover-label">THE AFTERHOURS COLLECTION</span><span class="cover-number">01</span>
+    <svg class="cover-art" viewBox="0 0 400 260"><defs><radialGradient id="orb"><stop stop-color="#fff"/><stop offset=".65" stop-color="#e2ffca"/><stop offset="1" stop-color="#a8ff70"/></radialGradient><filter id="glow"><feGaussianBlur stdDeviation="9"/></filter></defs><path d="m110 270 70-30 90 23-64 39Z" fill="#baff65" opacity=".15"/><path d="m131 226 64-27 78 21-60 32Z" fill="#a9ed65"/><path d="m196 174 47-18 54 13-44 21Z" fill="#7ccebc"/><path d="m145 132 35-12 39 10-33 16Z" fill="#7acdd0"/><path d="m180 100 26-9 30 8-25 11Z" fill="#7acdd0" opacity=".5"/><circle cx="204" cy="151" r="40" fill="#baff65" opacity=".55" filter="url(#glow)"/><circle cx="204" cy="151" r="24" fill="url(#orb)"/><path d="m202 112-13-22 15-21" stroke="#d4ffae" stroke-width="3" stroke-linecap="round" fill="none" opacity=".5"/></svg>
+    <div class="cover-caption"><span>AFTER<br>GLOW<span class="dot">.</span></span><small>A SOFTER KIND<br>OF RUSH ↗</small></div>
+  </div>
+  <div class="section-label"><h2>Pick your pace</h2><span>2 ORIGINAL TRACKS</span></div>
+  <div id="tracks" class="track-list" role="group" aria-label="Choose a track"></div>
+  <div class="home-foot"><span class="headphones">♫</span> Better with headphones <span class="foot-dot">•</span> No ads. Just rhythm.</div>
+  <footer class="launch"><button id="play" class="primary">Let's play <span>↗</span></button><p>Hold & drag to move. The ball hops for you.</p></footer>
+</section>
+<section id="game" class="screen" hidden>
+  <canvas id="stage" aria-label="Rhythm playfield. Hold and drag sideways to land on the next tile. Keyboard: left and right arrows or A and D." tabindex="0"></canvas>
+  <header class="game-hud"><button id="pause" class="icon-button" aria-label="Pause game">Ⅱ</button><div><small id="game-track">AFTERGLOW</small><strong id="score">0</strong></div><button id="sound" class="icon-button" aria-label="Mute audio" aria-pressed="false">♫</button></header>
+  <div class="progress-row"><span id="progress-fill"></span></div>
+  <div class="game-meta"><span id="beat-count">0 / 64</span><span id="combo">FIND YOUR FLOW</span></div>
+  <div id="feedback" class="feedback" role="status" aria-live="off"></div>
+  <div id="tutorial" class="tutorial"><span>← &nbsp; HOLD & DRAG &nbsp; →</span><small>Follow the glowing tiles</small></div>
+  <div id="modal" class="modal" hidden><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1"><p id="modal-kicker" class="eyebrow">TAKE A BREATHER</p><h2 id="modal-title">On pause.</h2><p id="modal-copy">Your rhythm will be right here.</p><div id="result-stats" class="result-stats" hidden></div><button id="modal-primary" class="primary">Resume <span>↗</span></button><button id="home-button" class="secondary">Back to tracks</button></div></div>
+</section>
+<div id="rotate" class="rotate" hidden><span>↻</span><h2>A little turn?</h2><p>Tile Rush plays best in portrait.</p><button id="landscape-continue" class="secondary">Continue in portrait frame</button></div>
+</main>
+<script type="module" src="./src/main.js"></script>
+</body></html>
