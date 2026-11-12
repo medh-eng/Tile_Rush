@@ -25,6 +25,19 @@ test('every step of every track schedules without error', () => {
   }
 });
 
+test('the singer, guitars, keys, brass and percussion all schedule on any context', () => {
+  const synth = new Synth(new FakeAudio()), before = created;
+  for (const syl of ['oh', 'ah', 'ooh', 'ee', 'ay', 'wo', 'la', 'na', 'da', 'yeah', 'hey', 'whoa']) {
+    synth.vocal(syl, 64, 1, 0.5, 1, { female: true }); synth.vocal(syl, 52, 1, 0.1, 1, { female: false, grit: true }); synth.shout(syl, 60, 1, { grit: true });
+  }
+  synth.vpad([48, 52, 55], 1, 2, {});
+  for (const voice of ['epiano', 'piano', 'brass', 'gtr', 'bell', 'pluck', 'super', 'saw', 'cowbell']) synth.lead(voice, 60, 1, 0.4);
+  for (const kind of ['synth', 'brass', 'piano', 'epiano', 'clean', 'power', 'chug']) synth.comp(kind, [48, 52, 55], 1, 0.5);
+  for (const style of ['round', 'pick', 'slap', 'eighth', 'long', '808']) synth.bass(style, 40, 1, 0.3);
+  synth.crash(1); synth.tom(1); synth.tamb(1); synth.snap(1); synth.rim(1); synth.conga(1, 0.3, true); synth.kick(1, 1, true);
+  assert.ok(created - before > 200);
+});
+
 test('clock: count-in, pause freezes, resume continues from the frozen time, seek rewinds', async () => {
   globalThis.AudioContext = FakeAudio;
   const sound = new Soundtrack(), track = TRACKS[0], beat = compile(track).beat;

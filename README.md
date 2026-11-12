@@ -2,11 +2,11 @@
 
 An original neon rhythm arcade game for phones. Hold and drag sideways; the ball hops to the music and you steer it onto every tile.
 
-**Version 0.3 — genres.** Five genres with five original tracks each (25 in all), a genre page and a track page, and everything from the 0.2 overhaul: a full synthesised soundtrack, a perspective runway with a different world per genre, stars, perfect streaks, fever, one continue per run and a live menu preview.
+**Version 0.4 — pop and rock.** Two new genres of ten original tracks each, with synthesised singers, guitars, keys, brass and percussion, on top of seven worlds and 45 tracks in all. Everything from 0.3 and the 0.2 overhaul is still here: a full synthesised soundtrack, a perspective runway with a different world per genre, stars, perfect streaks, fever, one continue per run and a live menu preview.
 
 ## What is in the game
 
-Pick a genre, then one of its five tracks. Each genre climbs from Easy to Expert and has its own world.
+Pick a genre, then one of its tracks. Each genre climbs from Easy to Expert and has its own world.
 
 | Genre | Feel | Tracks (easy → expert) | World |
 | --- | --- | --- | --- |
@@ -15,7 +15,10 @@ Pick a genre, then one of its five tracks. Each genre climbs from Easy to Expert
 | House | Four on the floor, 118–130 BPM | Rooftop 3AM · Velvet Elevator · Pulse Runner · Warehouse Glow · Skyline Social | Skyline that bounces with the kick |
 | Trance | Big leads and drops, 130–140 BPM | Skyward · Infinite Dawn · Crystal Ascent · Aurora Bloom · Polar Rave | Northern lights over pines |
 | Phonk | Cowbells and 808s, 132–146 BPM | Ghost Mode · Red Line · Cowbell Cartel · Midnight Phonk · Drift King | Eclipse, embers, spikes |
+| **Pop** | Dance-floor hooks, 96–156 BPM | Glitter Pulse · Disco Heartbeat · Sugar Rush · Palm Romance · Hola Sunset · Velvet Funk · Neon Confetti · Highway Heart · Starlit Showdown · Main Character | Mirror ball, searchlights, glowing stars |
+| **Rock** | Riffs and gang vocals, 104–184 BPM | Garage Sunrise · Back Seat Anthem · Jukebox Lightning · Stadium Lights · Sunday Riot · Dance Floor Fuzz · Gasoline Heart · Voltage Kid · Riot Parade · Final Encore | Concert stage, spotlights, amp stacks |
 
+- **Pop and rock have singers.** The hook of every pop and rock song is *sung*: a formant voice synthesiser sings "oh", "ah", "hey", "la", "yeah" and "whoa" on the lead melody (so every tile lands on a sung note), adds "ooh/aah" backing in pre-choruses and finales, and a stacked crowd shouts on the backbeat in the choruses. Pop uses a bright voice with dance-floor claps, disco and funk brass, e-piano, piano, clean guitar, congas, snaps and tambourine, with the music ducking on every kick. Rock uses a gritty voice, palm-muted and ringing power-chord guitars, a lead-guitar solo, a picked bass, toms fills and crashes.
 - **Tiles follow the melody.** Charts are generated from each track's lead line, so every landing is a note you hear. Easy tracks mostly land on the beat; harder ones follow faster phrases.
 - **Sections change the world.** Intro, verse, build, drop, break and finale each have their own colours, and you fly through a neon gate at every change. Each track also has its own colour shift.
 - **Scoring.** Centre landings are *Perfect*; a perfect streak raises the multiplier to ×5 and ignites *Fever* at ten in a row. Three stars mark a third, two thirds and the end of the track. Stars and best scores are kept per track.
@@ -59,13 +62,13 @@ GitHub Actions runs the syntax, unit, build and browser checks and uploads the w
 | Part | Deliverable | Status |
 | --- | --- | --- |
 | 1 | Playable portrait core | Done |
-| 2 | Music, melody-driven charts, visual overhaul, 25 tracks in five genres | Done through 0.3 except latency calibration and mastered audio; see QA notes |
+| 2 | Music, melody-driven charts, visual overhaul, 45 tracks in seven genres | Done through 0.4 except latency calibration, listening review and mastered audio; see QA notes |
 | 3 | Progression, cosmetics, practice and challenges | Stars and bests done; the rest planned |
 | 4 | Offline installation, Android package and device profiling | Planned |
 | 5 | Store readiness, closed testing and release | Planned |
 
-[Research and roadmap](docs/RESEARCH_AND_PLAN.md) · [Architecture](docs/ARCHITECTURE.md) · [0.3 QA and known limits](docs/PART_2_QA.md) · [Part 1 QA](docs/PART_1_QA.md)
+[Research and roadmap](docs/RESEARCH_AND_PLAN.md) · [Architecture](docs/ARCHITECTURE.md) · [0.4 QA](docs/VERSION_0_4_QA.md) · [0.3 QA and known limits](docs/PART_2_QA.md) · [Part 1 QA](docs/PART_1_QA.md)
 
 ## Scope
 
-A browser game, not an APK or a store release. All music is original and generated in code by the game's own synthesiser; there are no licensed songs, ads, purchases or accounts. Scores stay on the device. Tile Rush has its own art, interface, music and charts; the bouncing-ball rhythm mechanic is a shared genre convention.
+A browser game, not an APK or a store release. All music is original and generated in code by the game's own synthesiser; there are no licensed songs, samples, ads, purchases or accounts. The pop and rock tracks borrow the tempos, grooves, chord loops and hook shapes that make dance-pop and rock work, but none reproduces an existing song, and the "vocals" are synthesised syllables, not a recorded singer or written lyrics. Scores stay on the device. Tile Rush has its own art, interface, music and charts; the bouncing-ball rhythm mechanic is a shared genre convention.

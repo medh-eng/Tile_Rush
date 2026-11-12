@@ -10,6 +10,8 @@ const THEMES = {
   city: { deco: 'tower', palettes: [{ a: 188, b: 228 }, { a: 314, b: 256 }, { a: 46, b: 14 }, { a: 152, b: 204 }] },
   aurora: { deco: 'pine', palettes: [{ a: 152, b: 204 }, { a: 178, b: 262 }, { a: 96, b: 172 }, { a: 292, b: 204 }] },
   inferno: { deco: 'spike', palettes: [{ a: 356, b: 338 }, { a: 22, b: 2 }, { a: 288, b: 332 }, { a: 42, b: 12 }] },
+  disco: { deco: 'star', palettes: [{ a: 322, b: 292 }, { a: 44, b: 328 }, { a: 188, b: 276 }, { a: 288, b: 204 }] },
+  stage: { deco: 'amp', palettes: [{ a: 28, b: 6 }, { a: 352, b: 18 }, { a: 206, b: 232 }, { a: 48, b: 10 }] },
 };
 /** First palette of a track's world, rotated by the track's own hue shift. */
 export const themeColours = (track) => { const p = THEMES[track.theme].palettes[0], s = track.shift || 0; return { a: p.a + s, b: p.b + s }; };
@@ -283,6 +285,16 @@ export class Renderer {
       poly([[-wd, 0], [-wd, hgt], [wd, hgt], [wd, 0]]); c.fillStyle = body; c.fill(); c.strokeStyle = line; c.stroke();
       c.strokeStyle = dim; for (let v = 0.6; v < hgt - 0.2; v += 0.7) { poly([[-wd * 0.7, v], [wd * 0.7, v]], false); c.stroke(); }
       poly([[0, hgt], [0, hgt + 0.9]], false); c.strokeStyle = line; c.stroke();
+    } else if (type === 'star') {
+      const lift = 2.2 * tall + Math.sin(time * 2 + n) * 0.12, big = 0.7 + pulse * 0.2, long = 1.5 * big;
+      poly([[0, 0], [0, lift - 0.5]], false); c.strokeStyle = dim; c.stroke();
+      poly([[0, lift + long], [0.2 * big, lift + 0.2 * big], [long, lift], [0.2 * big, lift - 0.2 * big], [0, lift - long], [-0.2 * big, lift - 0.2 * big], [-long, lift], [-0.2 * big, lift + 0.2 * big]]);
+      c.fillStyle = hsl(a, 100, 78, 0.9); c.fill(); c.strokeStyle = line; c.stroke();
+    } else if (type === 'amp') {
+      const hgt = 2.9 * tall, wd = 0.8;
+      poly([[-wd, 0], [-wd, hgt], [wd, hgt], [wd, 0]]); c.fillStyle = body; c.fill(); c.strokeStyle = line; c.stroke();
+      for (const v of [hgt * 0.27, hgt * 0.73]) { c.strokeStyle = dim; c.beginPath(); c.arc(X(0), Y(v), k * (0.5 + pulse * 0.05), 0, 6.283); c.stroke(); c.beginPath(); c.arc(X(0), Y(v), k * 0.17, 0, 6.283); c.stroke(); }
+      poly([[-wd * 0.8, hgt * 0.5], [wd * 0.8, hgt * 0.5]], false); c.strokeStyle = line; c.stroke();
     } else if (type === 'pine') {
       c.fillStyle = body; c.strokeStyle = line;
       for (let i = 0; i < 3; i++) { const base = 0.5 + i * 0.95 * tall, wd = 0.95 - i * 0.24; poly([[-wd, base], [0, base + 1.5 * tall], [wd, base]]); c.fill(); c.stroke(); }
@@ -357,6 +369,50 @@ export class Renderer {
     c.globalCompositeOperation = 'source-over';
     this.ridge(c, w, hy, this.ridgeA, hy * 0.26, shift * 0.5, hsl(b, 50, 8), hsl(a, 100, 70, 0.5));
     this.ridge(c, w, hy, this.ridgeB, hy * 0.13, shift, hsl(b, 55, 4), hsl(a, 100, 66, 0.85));
+  }
+  disco(c, w, hy, a, b, time, pulse, shift) {
+    // sweeping beams, then a mirror ball hung over the stage
+    c.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 5; i++) {
+      const hue = [a, b, a + 40, b + 30, a - 30][i], sx = w * (0.1 + i * 0.2) - shift * 0.4, tip = sx + Math.sin(time * 0.7 + i * 1.7) * w * 0.35, width = w * 0.09;
+      const g = c.createLinearGradient(sx, 0, tip, hy); g.addColorStop(0, hsl(hue, 100, 70, 0.34 + pulse * 0.16)); g.addColorStop(1, hsl(hue, 100, 60, 0));
+      c.fillStyle = g; c.beginPath(); c.moveTo(sx - 3, 0); c.lineTo(sx + 3, 0); c.lineTo(tip + width, hy); c.lineTo(tip - width, hy); c.closePath(); c.fill();
+    }
+    c.globalCompositeOperation = 'source-over';
+    const r = Math.min(w * 0.19, hy * 0.3) * (1 + pulse * 0.04), cx = w / 2 - shift * 0.5, cy = hy * 0.34;
+    c.strokeStyle = hsl(a, 60, 80, 0.6); c.lineWidth = 1.5; c.beginPath(); c.moveTo(cx, 0); c.lineTo(cx, cy - r); c.stroke();
+    const ball = c.createRadialGradient(cx - r * 0.35, cy - r * 0.4, r * 0.1, cx, cy, r); ball.addColorStop(0, hsl(a, 40, 95)); ball.addColorStop(0.5, hsl(a, 60, 60)); ball.addColorStop(1, hsl(b, 70, 16));
+    c.fillStyle = ball; c.beginPath(); c.arc(cx, cy, r, 0, 6.283); c.fill();
+    c.save(); c.beginPath(); c.arc(cx, cy, r, 0, 6.283); c.clip(); c.strokeStyle = hsl(b, 60, 90, 0.28); c.lineWidth = 1;
+    const spin = (time * 0.5) % 1;
+    for (let i = -4; i <= 4; i++) { const x = cx + ((i + spin) / 4.5) * r; c.beginPath(); c.ellipse(cx, cy, Math.abs(x - cx), r, 0, 0, 6.283); c.stroke(); }
+    for (let i = -3; i <= 3; i++) { c.beginPath(); c.moveTo(cx - r, cy + (i / 3.5) * r); c.lineTo(cx + r, cy + (i / 3.5) * r); c.stroke(); }
+    c.restore();
+    c.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 22; i++) { const t = (time * 0.45 + i * 0.173) % 1, ang = i * 2.399 + time * 0.2, d = r * (1 + t * 1.7); c.fillStyle = hsl(a + i * 9, 100, 85, (1 - t) * (0.55 + pulse * 0.3)); const sz = 2.2 * (1 - t) + 0.8; c.fillRect(cx + Math.cos(ang) * d - sz / 2, cy + Math.sin(ang) * d * 0.8 - sz / 2, sz, sz); }
+    c.globalCompositeOperation = 'source-over';
+    this.ridge(c, w, hy, this.ridgeB, hy * 0.12, shift, hsl(b, 60, 5), hsl(a, 100, 68, 0.8));
+  }
+  stage(c, w, hy, a, b, time, pulse, shift) {
+    // truss with spotlights, haze, then the crowd with raised hands
+    const trussY = hy * 0.12;
+    c.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 6; i++) {
+      const hue = i % 2 ? a : b + 20, sx = w * (0.08 + i * 0.168), tip = sx + Math.sin(time * 0.9 + i * 1.3) * w * 0.14 - shift * 0.4;
+      const g = c.createLinearGradient(sx, trussY, tip, hy); g.addColorStop(0, hsl(hue, 100, 72, 0.42 + pulse * 0.25)); g.addColorStop(1, hsl(hue, 100, 55, 0));
+      c.fillStyle = g; c.beginPath(); c.moveTo(sx - 4, trussY); c.lineTo(sx + 4, trussY); c.lineTo(tip + w * 0.07, hy); c.lineTo(tip - w * 0.07, hy); c.closePath(); c.fill();
+    }
+    const haze = c.createLinearGradient(0, hy * 0.55, 0, hy); haze.addColorStop(0, hsl(a, 80, 50, 0)); haze.addColorStop(1, hsl(a, 80, 55, 0.3 + pulse * 0.2)); c.fillStyle = haze; c.fillRect(0, hy * 0.55, w, hy * 0.45);
+    c.globalCompositeOperation = 'source-over';
+    c.fillStyle = hsl(b, 40, 6); c.fillRect(0, trussY - 3, w, 6); c.strokeStyle = hsl(a, 100, 66, 0.8); c.lineWidth = 1; c.beginPath(); c.moveTo(0, trussY - 3); c.lineTo(w, trussY - 3); c.moveTo(0, trussY + 3); c.lineTo(w, trussY + 3); c.stroke();
+    for (let i = 0; i < 6; i++) { c.fillStyle = hsl(i % 2 ? a : b + 20, 100, 78, 0.9); c.beginPath(); c.arc(w * (0.08 + i * 0.168), trussY + 7, 4, 0, 6.283); c.fill(); }
+    this.ridge(c, w, hy, this.ridgeA, hy * 0.2, shift * 0.5, hsl(b, 55, 6), hsl(a, 100, 60, 0.45));
+    c.fillStyle = hsl(b, 60, 3);
+    for (let i = 0; i < 26; i++) {
+      const x = ((i * 0.0385 + 0.01) * w * 1.04 - shift) % (w + 20), up = Math.max(0, Math.sin(time * 3.1 + i * 2.3)) * (0.4 + pulse * 0.6), head = hy * (0.055 + ((i * 7) % 5) * 0.012);
+      c.beginPath(); c.arc(x, hy - head * 0.55, head * 0.32, 0, 6.283); c.fill(); c.fillRect(x - head * 0.4, hy - head * 0.4, head * 0.8, head * 0.4 + 1);
+      if (up > 0.2 && i % 3 !== 1) { c.fillRect(x + head * 0.3, hy - head * (1.1 + up * 0.9), 3, head * (0.8 + up * 0.8)); }
+    }
   }
   inferno(c, w, hy, a, b, time, pulse, shift) {
     const r = Math.min(w * 0.27, hy * 0.5), cx = w / 2, cy = hy * 0.56;

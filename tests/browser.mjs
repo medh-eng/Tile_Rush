@@ -13,7 +13,7 @@ await new Promise((resolve, reject) => { server.stdout.once('data', resolve); se
 let browser; const errors = []; let tests = 0;
 const check = (name) => { tests++; console.log(`PASS ${name}`); };
 const tap = (locator) => locator.click({ force: true }); // buttons animate, so skip the stability wait
-// Menus are two pages: genres, then that genre's five tracks.
+// Menus are two pages: genres, then that genre's tracks.
 const openGenre = async (page, genre) => { await tap(page.locator(`.genre[data-id="${genre.id}"]`)); await page.locator('.track').first().waitFor(); };
 const openTrack = async (page, track) => {
   if (await page.locator('#home').isVisible()) await openGenre(page, GENRES.find((g) => g.id === track.genre));
@@ -39,21 +39,21 @@ try {
   }
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForFunction(() => window.tileRush.time > 1); // the silent menu preview is running
-  await page.screenshot({ path: 'test-results/01-home.png' }); check('home lists five genres and fits four portrait sizes; live preview runs');
+  await page.screenshot({ path: 'test-results/01-home.png' }); check('home lists all seven genres and fits four portrait sizes; live preview runs');
 
   for (const genre of GENRES) {
     await openGenre(page, genre);
-    assert.equal(await page.locator('.track').count(), 5); assert.equal(await page.locator('#genre-name').textContent(), genre.name);
+    assert.equal(await page.locator('.track').count(), genre.tracks.length); assert.equal(await page.locator('#genre-name').textContent(), genre.name);
     assert.deepEqual(await page.locator('.track-title').allTextContents(), genre.tracks.map((t) => t.title));
     for (const size of [{ width: 320, height: 568 }, { width: 390, height: 844 }]) {
       await page.setViewportSize(size); assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
       const play = await page.locator('#play').boundingBox(); assert.ok(play.height >= 44 && play.y + play.height <= size.height, `play is on screen at ${size.width}x${size.height}`);
     }
     await page.setViewportSize({ width: 390, height: 844 });
-    if (genre.id === 'trance') await page.screenshot({ path: 'test-results/02-genre.png' });
+    if (['trance', 'pop', 'rock'].includes(genre.id)) await page.screenshot({ path: genre.id === 'trance' ? 'test-results/02-genre.png' : `test-results/02-genre-${genre.id}.png` });
     await tap(page.locator('#back')); await page.locator('.genre').first().waitFor();
   }
-  check('each genre opens a page with its five tracks, and Play stays reachable');
+  check('each genre opens a page with all of its tracks, and Play stays reachable');
 
   await openGenre(page, GENRES[0]);
   await tap(page.locator('.track').nth(1));
