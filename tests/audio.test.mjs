@@ -72,6 +72,8 @@ test('recorded playback seeks at the audio clock, mutes, pauses and reuses a dec
   try{
     assert.equal(await sound.start(track),true);assert.equal(sound.timer,null,'no synth scheduler for recorded music');
     assert.equal(sound.recordings.active.source.buffer.duration,48);
+    let synthVolume=-1;sound.synth.master.gain.setTargetAtTime=(value)=>{synthVolume=value;};
+    sound.applyVolume();assert.equal(synthVolume,0,'the electronic effects bus stays silent under human piano');
     await sound.pause(12.345);assert.equal(sound.recordings.active,null);assert.equal(sound.time,12.345);
     await sound.resume();assert.ok(sound.recordings.active);sound.setMuted(true);assert.equal(sound.muted,true);
     await sound.start(track,{at:24});assert.equal(fetched,1);assert.ok(sound.time>23.9);

@@ -318,7 +318,7 @@ export class Soundtrack {
     }
   }
   applyVolume() {
-    if (this.synth) this.synth.master.gain.setTargetAtTime(this.muted ? 0 : 0.8 * this.level, this.ctx.currentTime, 0.03);
+    if (this.synth) this.synth.master.gain.setTargetAtTime(this.muted || this.track?.recording ? 0 : 0.8 * this.level, this.ctx.currentTime, 0.03);
     this.recordings?.setVolume(this.muted ? 0 : this.level);
   }
   setMuted(value) { this.muted = value; this.applyVolume(); }
