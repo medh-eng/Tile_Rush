@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07030f">
+<meta name="description" content="Tile Rush: a one-finger neon rhythm game. Hold and drag through real piano performances and original electronic tracks.">
+<link rel="icon" href="./public/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./styles.css">
+<title>Tile Rush</title>
+</head>
+<body>
+<main id="app">
+  <canvas id="stage" tabindex="0" aria-label="Playfield. Hold and drag sideways so the ball lands on each tile. Keyboard: left and right arrows."></canvas>
+
+  <section id="home" class="screen">
+    <header class="top-row">
+      <span class="chip">PIANO + ELECTRONIC</span>
+      <button id="sound-home" class="icon-button sound-toggle" aria-label="Mute audio" aria-pressed="false"></button>
+    </header>
+    <div class="logo" aria-label="Tile Rush">
+      <h1><span>TILE</span><span>RUSH</span></h1>
+      <p>Real piano. Neon flow.</p>
+    </div>
+    <div class="picker grow">
+      <div class="picker-head"><h2>Choose a genre</h2><span id="total-stars" class="star-total"></span></div>
+      <div id="genres" class="genre-list" role="group" aria-label="Choose a genre"></div>
+    </div>
+  </section>
+
+  <section id="genre" class="screen" hidden>
+    <header class="top-row">
+      <button id="back" class="icon-button" aria-label="Back to genres"><span class="back-icon" aria-hidden="true"></span></button>
+      <div class="genre-title"><small id="genre-sub">GENRE</small><h2 id="genre-name"></h2></div>
+      <button id="sound-genre" class="icon-button sound-toggle" aria-label="Mute audio" aria-pressed="false"></button>
+    </header>
+    <div id="piano-note" class="piano-note" hidden><strong>Played by a person. Every note.</strong><p>Kimiko Ishizaka performs J. S. Bach. Three 48-second excerpts, with the pianist’s natural timing and touch.</p><details><summary>Music credits &amp; sources</summary><p>Recordings: <a href="https://kimikoishizaka.bandcamp.com/album/bach-well-tempered-clavier-book-1" target="_blank" rel="noopener">The Open Well-Tempered Clavier</a> · <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0 1.0</a>. Edited to short excerpts with fades. No endorsement implied.</p><p><a href="./public/music/rights.json" target="_blank" rel="noopener">Per-track sources and edit details</a></p></details></div>
+    <div class="spacer"></div>
+    <div class="picker">
+      <div id="tracks" class="track-list" role="group" aria-label="Choose a track"></div>
+    </div>
+    <footer class="launch">
+      <div class="listen-row"><button id="preview-toggle" class="preview-toggle">LISTEN TO PREVIEW</button><span id="audio-status" role="status" aria-live="polite"></span></div>
+      <button id="play" class="primary"><span class="play-icon" aria-hidden="true"></span>PLAY</button>
+      <p>Hold and drag to steer. The ball hops by itself.</p>
+    </footer>
+  </section>
+
+  <section id="hud" class="screen" hidden>
+    <header class="hud-row">
+      <button id="pause" class="icon-button" aria-label="Pause game"><span class="pause-icon" aria-hidden="true"></span></button>
+      <div class="score-box"><strong id="score">0</strong><small id="hud-track"></small></div>
+      <button id="sound" class="icon-button sound-toggle" aria-label="Mute audio" aria-pressed="false"></button>
+    </header>
+    <div class="progress" aria-hidden="true">
+      <span id="progress-fill"></span>
+      <i class="star-mark" style="left:33.33%"></i><i class="star-mark" style="left:66.66%"></i><i class="star-mark" style="left:100%"></i>
+    </div>
+    <div id="multiplier" class="multiplier" hidden></div>
+    <div id="feedback" class="feedback" role="status" aria-live="off"></div>
+    <div id="count" class="count" aria-live="polite"></div>
+    <div id="tutorial" class="tutorial" hidden><span class="hand" aria-hidden="true"></span><strong>HOLD &amp; DRAG</strong><small>Slide left and right to follow the tiles</small></div>
+  </section>
+
+  <div id="modal" class="modal" hidden>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
+      <p id="modal-kicker" class="kicker"></p>
+      <h2 id="modal-title"></h2>
+      <div id="modal-stars" class="big-stars" hidden><i></i><i></i><i></i></div>
+      <div id="result-stats" class="result-stats" hidden></div>
+      <p id="modal-copy" class="modal-copy"></p>
+      <button id="modal-primary" class="primary"></button>
+      <button id="modal-secondary" class="secondary"></button>
+      <button id="home-button" class="ghost">Back to tracks</button>
+    </div>
+  </div>
+
+  <div id="rotate" class="rotate"><span aria-hidden="true">↻</span><h2>Turn your phone upright</h2><p>Tile Rush plays in portrait.</p></div>
+</main>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
