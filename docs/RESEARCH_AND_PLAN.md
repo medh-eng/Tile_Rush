@@ -82,3 +82,9 @@ Acceptance: all prior gates met, current store requirements checked, the publish
 Music appeal, touch feel, latency and chart readability matter more than adding menus. The simple synth tracks are prototype material. Bluetooth latency, touch-to-display delay, battery impact, audio recovery during calls and sustained low-end performance have not been established by desktop automation. Browser success does not substitute for phone testing.
 
 Keep the next milestone focused on those points. Do not describe the prototype as a published Android app, a proven viral product, or a finished content catalogue.
+
+## 12 November update: natural music direction
+
+The user approved reusing the separate Claude setup where useful while preserving that branch. The Codex branch now adapts its neon presentation/playable foundation and adds **Piano Sessions**: three real Bach performances by Kimiko Ishizaka, bundled as credited CC0 48-second edits. Non-uniform recording attack cues replace a rigid BPM grid for this collection. The electronic catalogue remains separate. See [the implementation/provenance note](PART_2_NATURAL_MUSIC.md) and the exact sources in `public/music/rights.json`.
+
+This delivers the first natural-performance music collection. Calibration, more instruments/recordings, device listening review and Android packaging remain subsequent milestones.
