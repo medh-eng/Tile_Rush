@@ -8,11 +8,13 @@ const LOOKAHEAD = 0.2, TICK_MS = 25;
 // The synthesised singer. Vowel formants in Hz as [F1, F2, F3]; a syllable is an optional consonant onset plus one
 // or two vowels the voice glides through. 'x' is the vowel of "yeah". The same voice sings verses, hooks and shouts.
 const FORMANTS = { a: [800, 1150, 2900], e: [550, 1800, 2600], i: [310, 2250, 3050], o: [450, 850, 2800], u: [330, 750, 2600], x: [690, 1660, 2490] };
-const ONSETS = { l: [360, 1100, 2700], n: [260, 1250, 2500], d: [320, 1700, 2600], y: [300, 2200, 3000] };
+const ONSETS = { l: [360, 1100, 2700], n: [260, 1250, 2500], d: [320, 1700, 2600], y: [300, 2200, 3000], b: [220, 1000, 2300], v: [250, 1300, 2400] };
 const SYLLABLES = {
   oh: { v: 'o' }, ah: { v: 'a' }, ooh: { v: 'u' }, ee: { v: 'i' }, ay: { v: 'ei' }, wo: { v: 'uo' },
   la: { v: 'a', on: 'l' }, na: { v: 'a', on: 'n' }, da: { v: 'a', on: 'd' },
   yeah: { v: 'ix', on: 'y' }, hey: { v: 'ei', on: 'h' }, whoa: { v: 'uo', on: 'h' },
+  aa: { v: 'a' }, yo: { v: 'o', on: 'y' }, oi: { v: 'oi' }, oye: { v: 'oe' }, hoi: { v: 'oi', on: 'h' }, ho: { v: 'o', on: 'h' },
+  ba: { v: 'a', on: 'b' }, le: { v: 'e', on: 'l' }, ni: { v: 'i', on: 'n' }, ve: { v: 'e', on: 'v' }, ja: { v: 'a', on: 'd' },
 };
 const FILL = { 10: 190, 12: 160, 13: 160, 14: 125, 15: 100 }; // tom fill on the last bar of a section: step -> pitch
 
@@ -164,6 +166,17 @@ export class Synth {
     const slap = this.pluckAmp(at, vol * 0.3, 0.02), bp = this.filter('bandpass', 1800, 1);
     this.burst(at, 0.03, bp, (at * 4.3) % 1); bp.connect(slap); this.out(g, { drum: 1, rev: 0.12 }); this.out(slap, { drum: 1 });
   }
+  /** Dhol: the bass head ('dha', deep and round) or the treble head ('tin', sharp stick crack). */
+  dhol(at, vol = 0.8, treble = false) {
+    if (!treble) {
+      const g = this.pluckAmp(at, 0.9 * vol, 0.32), o = this.osc('sine', 125, at, at + 0.34, g); o.frequency.exponentialRampToValueAtTime(70, at + 0.14);
+      const skin = this.pluckAmp(at, 0.35 * vol, 0.05), bp = this.filter('bandpass', 900, 1); this.burst(at, 0.06, bp, (at * 7.7) % 1); bp.connect(skin);
+      this.out(g, { drum: 1, rev: 0.12 }); this.out(skin, { drum: 1 }); return;
+    }
+    const g = this.pluckAmp(at, 0.5 * vol, 0.09), o = this.osc('sine', 420, at, at + 0.1, g); o.frequency.exponentialRampToValueAtTime(300, at + 0.05);
+    const tick = this.pluckAmp(at, 0.5 * vol, 0.05), bp = this.filter('bandpass', 3500, 1); this.burst(at, 0.06, bp, (at * 5.9) % 1); bp.connect(tick);
+    this.out(g, { drum: 1, rev: 0.1 }); this.out(tick, { drum: 1 });
+  }
 
   // --- pitched instruments ---
   lead(voice, midi, at, dur, vol = 1, thick = false) {
@@ -172,6 +185,7 @@ export class Synth {
     if (voice === 'piano') return this.piano(f, at, vol, Math.max(0.6, dur * 1.2));
     if (voice === 'brass') return this.brass(f, at, dur, vol);
     if (voice === 'gtr') return this.leadGuitar(f, at, dur, vol);
+    if (voice === 'tumbi') return this.tumbi(f, at, dur, vol);
     if (voice === 'bell') {
       const g = this.pluckAmp(at, 0.2 * vol, Math.max(0.5, dur * 1.6)), end = at + Math.max(0.5, dur * 1.6) + 0.05;
       const carrier = this.osc('sine', f, at, end, g), index = ctx.createGain();
@@ -240,6 +254,21 @@ export class Synth {
     this.vibrato(oscs, f, at, hold, 0.01);
     shaper.connect(lp); lp.connect(g); this.out(g, { rev: 0.25, dly: 0.22 });
   }
+  /** Tumbi: a one-string folk instrument, a bright twangy pluck with a quick scoop and a buzz of string noise. */
+  tumbi(f, at, dur, vol = 1) {
+    const decay = Math.max(0.22, Math.min(dur * 1.1, 0.55)), end = at + decay + 0.05, g = this.pluckAmp(at, 0.17 * vol, decay), lp = this.filter('lowpass', 4000, 2.5);
+    lp.frequency.setValueAtTime(Math.min(9000, f * 12), at); lp.frequency.exponentialRampToValueAtTime(Math.max(900, f * 3), at + 0.25);
+    const a = this.osc('sawtooth', f, at, end, lp), b = this.ctx.createGain(); b.gain.value = 0.5; b.connect(lp); const c = this.osc('square', f * 1.004, at, end, b);
+    for (const o of [a, c]) { o.frequency.setValueAtTime(f * 0.96, at); o.frequency.exponentialRampToValueAtTime(f, at + 0.03); }
+    const buzz = this.pluckAmp(at, 0.2 * vol, 0.04), hp = this.filter('highpass', 3000); this.burst(at, 0.05, hp, (at * 8.3) % 1); hp.connect(buzz);
+    lp.connect(g); this.out(g, { rev: 0.22, dly: 0.12 }); this.out(buzz, { rev: 0.1 });
+  }
+  /** Harmonium: reedy sustained chords. */
+  harmonium(tones, at, dur, vol = 1) {
+    const hold = Math.max(0.2, dur * 0.95), end = at + hold + 0.25, g = this.amp(at, 0.04, 0.05 * vol, hold, 0.2), lp = this.filter('lowpass', 2600, 0.8);
+    for (const m of tones) { const f = hz(m); this.osc('sawtooth', f, at, end, lp, -8); this.osc('sawtooth', f, at, end, lp, 8); this.osc('square', f * 2, at, end, lp); }
+    lp.connect(g); this.out(g, { rev: 0.3 });
+  }
   /** A power chord (root, fifth, octave). 'chug' is palm-muted and short; 'power' rings for the length of the hit. */
   guitar(kind, root, at, dur, vol = 1) {
     const mute = kind === 'chug', f = hz(root), hold = mute ? 0.08 : Math.max(0.1, dur * 0.95), end = at + hold + (mute ? 0.07 : 0.14);
@@ -259,6 +288,8 @@ export class Synth {
   /** Rhythm instrument for a section: stabs, keys or guitar chords on the chord of the bar. */
   comp(kind, tones, at, dur, vol = 1) {
     if (kind === 'power' || kind === 'chug') return this.guitar(kind, tones[0], at, dur, vol);
+    if (kind === 'tumbi') { this.tumbi(hz(tones[2] + 12), at, dur, 0.75 * vol); return; }
+    if (kind === 'harmonium') return this.harmonium(tones, at, dur, vol);
     if (kind === 'clean') { [...tones, tones[0] + 12].forEach((m, i) => this.pick(hz(m), at + i * 0.011, vol)); return; }
     if (kind === 'piano') { for (const m of tones) this.piano(hz(m), at, 0.7 * vol, Math.max(0.5, dur * 1.1)); return; }
     if (kind === 'epiano') { for (const m of tones) this.epiano(hz(m), at, dur, 0.7 * vol); return; }
@@ -324,6 +355,22 @@ export class Synth {
       const g = this.amp(at, 0.03, 0.25 * vol, dur * 0.9, 0.2), lp = this.filter('lowpass', 420, 1);
       this.osc('sine', f, at, at + dur + 0.25, g); this.osc('sawtooth', f, at, at + dur + 0.25, lp, 4); lp.connect(g); return this.out(g);
     }
+    if (style === 'reese') {
+      const g = this.amp(at, 0.015, 0.24 * vol, dur * 0.95, 0.1), lp = this.filter('lowpass', 650, 3);
+      lp.frequency.setValueAtTime(380, at); lp.frequency.linearRampToValueAtTime(900, at + dur * 0.9);
+      for (const cents of [-16, 0, 16]) this.osc('sawtooth', f, at, at + dur + 0.2, lp, cents);
+      const sub = this.ctx.createGain(); sub.gain.value = 0.5; sub.connect(g); this.osc('sine', f, at, at + dur + 0.2, sub); lp.connect(g); return this.out(g);
+    }
+    if (style === 'wub') {
+      const g = this.amp(at, 0.01, 0.26 * vol, dur * 0.95, 0.08), lp = this.filter('lowpass', 420, 6), depth = this.ctx.createGain(); depth.gain.value = 380;
+      this.osc('sine', 5.5, at, at + dur + 0.2, depth); depth.connect(lp.frequency);
+      this.osc('sawtooth', f, at, at + dur + 0.2, lp); this.osc('square', f, at, at + dur + 0.2, lp, 7);
+      const sub = this.ctx.createGain(); sub.gain.value = 0.5; sub.connect(g); this.osc('sine', f, at, at + dur + 0.2, sub); lp.connect(g); return this.out(g);
+    }
+    if (style === 'sub') {
+      const g = this.amp(at, 0.01, 0.38 * vol, dur * 0.9, 0.08), tri = this.ctx.createGain(); tri.gain.value = 0.18; tri.connect(g);
+      this.osc('sine', f, at, at + dur + 0.2, g); this.osc('triangle', f * 2, at, at + dur + 0.2, tri); return this.out(g);
+    }
     if (style === 'round') {
       const g = this.amp(at, 0.01, 0.3 * vol, dur * 0.8, 0.1), lp = this.filter('lowpass', 520, 1);
       this.osc('triangle', f, at, at + dur + 0.2, lp); this.osc('sine', f, at, at + dur + 0.2, g); lp.connect(g); return this.out(g);
@@ -377,6 +424,8 @@ export class Synth {
     if (kit.r?.[s] === 'x') this.rim(at);
     if (kit.g && kit.g[s] !== '.') this.conga(at, 0.3, kit.g[s] === 'o');
     if (kit.b?.[s] === 'x') this.lead('cowbell', 76, at, 0.1, 0.6);
+    if (kit.d?.[s] === 'x') this.dhol(at, 0.85);
+    if (kit.e?.[s] === 'x') this.dhol(at, 0.6, true);
     if (kit.roll) {
       const left = sec.bars - rel, every = left > 2 ? 4 : left > 1 ? 2 : s < 8 ? 2 : 1;
       if (s % every === 0) this.snare(at, 0.16 + 0.34 * ((rel * 16 + s) / (sec.bars * 16)));
@@ -395,8 +444,8 @@ export class Synth {
     if (sec.harm && s === 0) this.vpad(tones, at, s16 * 16, vox);
     if (sec.gang?.[s] === 'x') { const list = track.syl?.g || ['hey']; this.shout(list[(bar * 4 + (s >> 2)) % list.length], track.root + 12, at, vox); }
     if (sec.bass) {
-      let root = degree(track, track.prog[bar % track.prog.length]); while (root > 45) root -= 12;
       const style = track.bass, line = BASS[style];
+      let root = degree(track, track.prog[bar % track.prog.length]); while (root > (line?.cap ?? 45)) root -= 12;
       if (line) { if (line.p[s] === 'x') this.bass(line.t, root + (line.up?.[s] === 'x' ? 12 : 0), at, s16 * line.len); }
       else if (style === 'eighth' && s % 2 === 0) this.bass(style, root + (s === 14 ? 12 : 0), at, s16 * 2);
       else if (style === 'off' && s % 4 === 2) this.bass(style, root, at, s16 * 2);

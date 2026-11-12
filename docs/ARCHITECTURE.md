@@ -4,7 +4,7 @@ Six small ES modules, no dependencies, no build step.
 
 | File | Responsibility |
 | --- | --- |
-| `src/songs.js` | The catalogue: `GENRES` (seven: five with five tracks, and Pop and Rock with ten) and flat `TRACKS` (45). A track is data: key, chord loop, drum/bass styles, sections and lead phrases. Five tracks are hand-written; the other forty are composed by `compose()` from a seed, key, tempo and chord loop (see below). `compile()` expands any track into a timeline of sections and lead notes. |
+| `src/songs.js` | The catalogue: `GENRES` (nine: five with five tracks, and Pop, Rock, Drum & Bass and Punjabi with ten) and flat `TRACKS` (65). A track is data: key, chord loop, drum/bass styles, sections and lead phrases. Five tracks are hand-written; the other sixty are composed by `compose()` from a seed, key, tempo and chord loop (see below). `compile()` expands any track into a timeline of sections and lead notes. |
 | `src/model.js` | Rules. `createChart()` turns the lead line into tiles; `Run` judges landings, scores, awards stars and handles the single revive; `autoX()` is the autopilot used by the menu preview, `?demo` and tests. No DOM or audio. |
 | `src/audio.js` | `Synth` (drums and percussion, bass, pads, arps, lead voices, the formant singer, keys, brass and guitars, risers, impacts, reverb, echo, side-chain, bus compressor) and `Soundtrack` (the clock, 25 ms scheduler with 200 ms lookahead, pause/seek/resume, silent fallback). `renderOffline()` renders a whole track for mix checks. |
 | `src/renderer.js` | Canvas 2D one-point perspective: sky and backdrop per theme, beat-locked floor grid, roadside scenery, section gates, tiles, ball, trail, particles, rings, beams, overlays. Adaptive resolution. |

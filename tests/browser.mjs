@@ -39,7 +39,7 @@ try {
   }
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForFunction(() => window.tileRush.time > 1); // the silent menu preview is running
-  await page.screenshot({ path: 'test-results/01-home.png' }); check('home lists all seven genres and fits four portrait sizes; live preview runs');
+  await page.screenshot({ path: 'test-results/01-home.png' }); check('home lists all nine genres and fits four portrait sizes; live preview runs');
 
   for (const genre of GENRES) {
     await openGenre(page, genre);
@@ -50,7 +50,7 @@ try {
       const play = await page.locator('#play').boundingBox(); assert.ok(play.height >= 44 && play.y + play.height <= size.height, `play is on screen at ${size.width}x${size.height}`);
     }
     await page.setViewportSize({ width: 390, height: 844 });
-    if (['trance', 'pop', 'rock'].includes(genre.id)) await page.screenshot({ path: genre.id === 'trance' ? 'test-results/02-genre.png' : `test-results/02-genre-${genre.id}.png` });
+    if (['trance', 'pop', 'rock', 'dnb', 'punjabi'].includes(genre.id)) await page.screenshot({ path: genre.id === 'trance' ? 'test-results/02-genre.png' : `test-results/02-genre-${genre.id}.png` });
     await tap(page.locator('#back')); await page.locator('.genre').first().waitFor();
   }
   check('each genre opens a page with all of its tracks, and Play stays reachable');
