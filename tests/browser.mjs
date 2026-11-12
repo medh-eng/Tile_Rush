@@ -103,7 +103,7 @@ try {
       await page.waitForFunction(() => window.tileRush.mode === 'playing', null, { timeout: 8000 });
     }
   } catch (error) {
-    console.log('PIANO START STATE',JSON.stringify(await page.evaluate(()=>({mode:window.tileRush.mode,status:document.querySelector('#audio-status').textContent,disabled:document.querySelector('#play').disabled,genre:document.querySelector('#genre-name').textContent,hud:document.querySelector('#hud').hidden,audio:window.testAudio?.state,body:document.body.innerText}))),null,2));
+    console.log('PIANO START STATE',JSON.stringify(await page.evaluate(()=>({mode:window.tileRush.mode,status:document.querySelector('#audio-status').textContent,disabled:document.querySelector('#play').disabled,genre:document.querySelector('#genre-name').textContent,hud:document.querySelector('#hud').hidden,audio:window.testAudio?.state,body:document.body.innerText})),null,2));
     const evidence=await page.screenshot({path:'test-results/piano-start-diagnostic.png',scale:'css'});
     console.log('PIANO_EVIDENCE_BASE64:'+evidence.toString('base64'));
     throw error;
