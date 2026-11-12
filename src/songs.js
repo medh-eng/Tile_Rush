@@ -15,6 +15,7 @@ export const SCALES = {
   phrygian: [0, 1, 3, 5, 7, 8, 10],
   dorian: [0, 2, 3, 5, 7, 9, 10],
   mixolydian: [0, 2, 4, 5, 7, 9, 10],
+  harmonic: [0, 2, 3, 5, 7, 8, 11],
 };
 
 export const DRUMS = {
@@ -80,6 +81,27 @@ export const DRUMS = {
   punkFull: { k: 'x.x.x.x.x.x.x.x.', s: '..x...x...x...x.', h: 'x.x.x.x.x.x.x.x.', o: '..............x.' },
   epic: { k: 'x.......x.x.....', s: '....x.......x...', h: 'x.x.x.x.x.x.x.x.' },
   epicFull: { k: 'x.xxx.xxx.xxx.xx', s: '....x.......x...', h: 'x.x.x.x.x.x.x.x.', o: '..x.......x.....' },
+
+  // --- Drum & bass (two-step and rolling breaks) and Punjabi (dhol: d = bass 'dha', e = treble 'tin') ---
+  dnbHalf: { k: 'x...............', s: '........x.......', h: 'x.x.x.x.x.x.x.x.' },
+  dnbSparse: { k: 'x.........x.....', s: '............x...', h: 'x.x.x.x.x.x.x.x.' },
+  liquidFull: { k: 'x.........x.....', s: '....x.......x...', h: 'x.xox.xox.xox.xo', o: '..x.......x.....', t: 'xoxoxoxoxoxoxoxo' },
+  rollerFull: { k: 'x.........x...x.', s: '....x.......x...', h: 'xoxoxoxoxoxoxoxo', o: '..x.......x.....' },
+  jungleFull: { k: 'x.x.......xx....', s: '....x..x.x..x...', h: 'x.x.x.x.x.x.x.x.', o: '..x.......x.....' },
+  techFull: { k: 'x.........x.....', s: '....x.......x...', c: '....x.......x...', h: 'x...x...x...x...', o: '..x...x...x...x.' },
+  neuroFull: { k: 'x.........x..x..', s: '....x.......x...', h: 'x.x.x.x.x.x.x.xx', o: '..x.......x.....' },
+  jumpFull: { k: 'x.........x.....', s: '....x.......x...', c: '....x.......x...', h: 'xoxoxoxoxoxoxoxo', o: '..x...x...x...x.' },
+  darkFull: { k: 'x.........x.x...', s: '....x.......x...', h: 'x.x.x.x.x.x.x.x.', o: '..x...x...x...x.' },
+  raveFull: { k: 'x.x.......x.x...', s: '....x.......x...', c: '....x.......x...', h: 'xxxoxxxoxxxoxxxo', o: '..x.......x.....', t: 'xoxoxoxoxoxoxoxo' },
+  dholki: { g: 'x..x..x.x..x..x.', e: '..x...x...x...x.', t: 'x.x.x.x.x.x.x.x.' },
+  dholkiFull: { g: 'x.ox..xox.ox..xo', d: 'x.......x.......', e: '..x.x.x...x.x.x.', t: 'xoxoxoxoxoxoxoxo', c: '....x.......x...' },
+  bhangraL: { d: 'x.......x.......', e: '..x...x...x.....', t: 'x.x.x.x.x.x.x.x.' },
+  bhangraF: { d: 'x..x..x.x..x..x.', e: '..x.x.x...x.x.x.', k: 'x...x...x...x...', c: '....x.......x...', t: 'xoxoxoxoxoxoxoxo' },
+  bhangraFast: { d: 'x.xx.xx.x.xx.xx.', e: '..x.x.x.x.x.x.x.', k: 'x...x...x...x...', c: '....x.......x...', t: 'xoxoxoxoxoxoxoxo', h: '..o...o...o...o.' },
+  pbPopL: { k: 'x.......x.......', d: 'x.....x.........', e: '....x.......x...', h: '..o...o...o...o.' },
+  pbPopF: { k: 'x...x...x...x...', c: '....x.......x...', d: 'x..x..x.x..x..x.', e: '..x...x...x...x.', h: 'x.xox.xox.xox.xo', t: '.x.x.x.x.x.x.x.x' },
+  pbTrapL: { k: 'x.....x.x.......', s: '........x.......', h: 'x.xxx.xxx.x.xxxx', d: '..x.......x.....' },
+  pbTrapF: { k: 'x.....x.x.....x.', s: '........x.......', c: '........x.......', h: 'xxxxxxxxxxxxxxxx', d: '..x..x....x.x...', e: '....x.......x...' },
 };
 
 /** Bass lines for the pop and rock genres: a pattern of sixteenths, a timbre, and which hits jump an octave. */
@@ -93,6 +115,17 @@ export const BASS = {
   pick: { t: 'pick', p: 'x.x.x.x.x.x.x.x.', len: 2 },
   pickSync: { t: 'pick', p: 'x.x...x.x.x...x.', len: 2 },
   gallop: { t: 'pick', p: 'x.xxx.xxx.xxx.xx', len: 1.2 },
+  // drum & bass: low reese / wub / sub lines (cap = highest note before dropping an octave)
+  reese: { t: 'reese', p: 'x.......x.......', len: 8, cap: 40 },
+  reeseStep: { t: 'reese', p: 'x.....x.x.......', len: 3, cap: 40 },
+  neuro: { t: 'reese', p: 'x..x..x...x.x...', len: 2, cap: 40 },
+  wub: { t: 'wub', p: 'x.......x.......', len: 7, cap: 40 },
+  sub: { t: 'sub', p: 'x.........x.....', len: 8, cap: 40 },
+  rollSub: { t: 'sub', p: 'x.x...x.x.x...x.', len: 2, cap: 40 },
+  // punjabi
+  bhangra: { t: 'round', p: 'x..x..x.x..x..x.', len: 3 },
+  bhangraSlow: { t: 'round', p: 'x.....x.x.......', len: 4 },
+  pbPop: { t: 'eighth', p: 'x..x..x...x.x...', len: 2 },
 };
 
 /** Rhythm guitar and keyboard comping patterns (one bar of sixteenths). */
@@ -118,6 +151,13 @@ export const SYLSETS = {
   dada: { v: ['ah', 'ooh'], h: ['da', 'da', 'ah', 'da'], g: ['hey', 'hey', 'oh', 'hey'] },
   oooh: { v: ['ooh', 'oh'], h: ['ooh', 'ah', 'ooh', 'oh'], g: ['oh', 'ay'] },
   rock: { v: ['ah', 'oh'], h: ['oh', 'ah', 'oh', 'ay'], g: ['hey', 'hey', 'oh', 'hey'] },
+  // drum & bass: airy sung hooks, and MC shouts
+  mc: { v: ['ah', 'oh'], h: ['yo', 'oh', 'yo', 'ah'], g: ['oi', 'yo', 'hey'] },
+  // punjabi exclamations
+  bhangra: { v: ['aa', 'oh'], h: ['ho', 'ho', 've', 'ho', 'ba', 'le', 'ba', 'le'], g: ['hoi', 'oye', 'ho'] },
+  oye: { v: ['aa', 'oh'], h: ['oye', 'oye', 'hoi', 'ho'], g: ['oye', 'hoi'] },
+  gidha: { v: ['aa', 'ooh'], h: ['ni', 'ni', 've', 'ni'], g: ['hoi', 'ho'] },
+  tappe: { v: ['aa', 'oh'], h: ['ja', 'ni', 'ja', 've', 'ho', 'ho', 'oye', 'ho'], g: ['hoi', 'oye', 'ba'] },
 };
 
 const HAND = [
@@ -483,6 +523,66 @@ const GENRE_DEFS = [
         drums: { verse: 'punk', full: 'punkFull' }, comps: { riff: 'power:eighth', lo: 'power:eighth', hi: 'power:eighth' }, gang: 'run' },
       { id: 'final-encore', title: 'Final Encore', bpm: 150, root: 51, scale: 'minor', prog: [0, 5, 2, 6], seed: 359, shift: 25, motif: '7 - 6 - 4 - 6 7', syl: 'whoa', bigSnare: true,
         bass: 'gallop', drums: { verse: 'epic', full: 'epicFull' }, comps: { riff: 'chug:gallop', lo: 'chug:chug', hi: 'power:half' } }],
+  },
+  {
+    id: 'dnb', name: 'Drum & Bass', tagline: 'Breakbeats, reese basslines and rave shouts',
+    prof: {
+      theme: 'rave', lead: 'vox', bass: 'reese', scale: 'minor', body: 'mid', hook: 'bounce', range: { A: [0, 7], B: [2, 9], H: [2, 10] },
+      templates: { std: POP_LONG, long: POP_LONG }, kits: { intro: 'none', verse: 'dnbHalf', full: 'rollerFull', brk: 'none' },
+      comps: { lo: 'synth:half', hi: 'synth:off' }, voices: { v: 'voxv', p: 'voxv', h: 'vox', b: 'epiano' },
+      syl: 'oooh', dbl: 'super', gang: 'off', female: true, grit: false, acoustic: false,
+    },
+    slots: [
+      { id: 'liquid-skyline', title: 'Liquid Skyline', bpm: 170, root: 60, prog: [0, 5, 2, 6], seed: 401, shift: 0, motif: '4 - 4 5 . 4 2 -', syl: 'oooh',
+        bass: 'rollSub', drums: { verse: 'dnbSparse', full: 'liquidFull' }, comps: { lo: 'epiano:half', hi: 'epiano:off' }, dbl: 'bell', voices: { b: 'bell' } },
+      { id: 'sunrise-roller', title: 'Sunrise Roller', bpm: 172, root: 59, scale: 'dorian', prog: [0, 3, 0, 4], seed: 409, shift: 45, motif: '4 . 4 5 . 7 5 .', syl: 'yeah',
+        drums: { verse: 'dnbHalf', full: 'rollerFull' }, comps: { lo: 'synth:half', hi: 'synth:sync' }, dbl: 'pluck' },
+      { id: 'neon-jungle', title: 'Neon Jungle', bpm: 168, root: 58, prog: [0, 6, 5, 6], seed: 419, shift: -60, motif: '4 4 . 4 5 . 2 -', syl: 'hey', gang: 'sync',
+        bass: 'reeseStep', drums: { verse: 'dnbSparse', full: 'jungleFull' }, comps: { lo: 'brass:two', hi: 'brass:sync' }, dbl: 'brass' },
+      { id: 'sub-zero', title: 'Sub Zero', bpm: 174, root: 52, prog: [0, 0, 5, 6], seed: 421, shift: 100, motif: '2 . 4 . 5 - 4 2', syl: 'mc', female: false, grit: true,
+        bass: 'sub', drums: { verse: 'dnbHalf', full: 'techFull' }, comps: { lo: 'synth:half', hi: 'synth:quarter' } },
+      { id: 'rewind-riot', title: 'Rewind Riot', bpm: 174, root: 53, prog: [0, 3, 5, 4], seed: 431, shift: -100, motif: '4 4 5 4 . 2 4 -', syl: 'mc', female: false, grit: true, gang: 'sync',
+        bass: 'wub', drums: { verse: 'dnbSparse', full: 'jumpFull' }, comps: { lo: 'brass:half', hi: 'brass:sync' }, dbl: 'brass' },
+      { id: 'midnight-roller', title: 'Midnight Roller', bpm: 172, root: 55, prog: [0, 5, 6, 0], seed: 433, shift: 140, motif: '4 - 5 - 4 . 2 .', syl: 'nana',
+        drums: { verse: 'dnbHalf', full: 'rollerFull' }, comps: { lo: 'epiano:half', hi: 'synth:eighth' }, dbl: 'bell' },
+      { id: 'techstep-temple', title: 'Techstep Temple', bpm: 176, root: 50, voxTrim: -2, scale: 'phrygian', prog: [0, 1, 0, 6], seed: 439, shift: -140, motif: '0 . 2 . 4 . 3 2', syl: 'whoa', female: false, grit: true,
+        bass: 'neuro', drums: { verse: 'dnbSparse', full: 'techFull' }, comps: { lo: 'synth:quarter', hi: 'synth:eighth' } },
+      { id: 'neurofunk-lab', title: 'Neurofunk Lab', bpm: 174, root: 51, prog: [0, 6, 4, 5], seed: 443, shift: 175, motif: '4 4 . 5 4 . 7 5', syl: 'mc', female: false, grit: true,
+        bass: 'neuro', drums: { verse: 'dnbSparse', full: 'neuroFull' }, comps: { lo: 'synth:half', hi: 'synth:sync' } },
+      { id: 'darkside-drop', title: 'Darkside Drop', bpm: 178, root: 49, scale: 'phrygian', prog: [0, 1, 5, 0], seed: 449, shift: -175, motif: '0 0 . 2 . 4 . 3', syl: 'hey', female: false, grit: true,
+        bass: 'wub', drums: { verse: 'dnbHalf', full: 'darkFull' }, comps: { lo: 'synth:quarter', hi: 'synth:eighth' }, gang: 'run' },
+      { id: 'rave-rewind', title: 'Rave Rewind', bpm: 180, root: 57, prog: [0, 5, 2, 6], seed: 457, shift: 60, motif: '7 - 6 - 4 5 7 -', syl: 'whoa', voxTrim: 0,
+        bass: 'neuro', drums: { verse: 'dnbSparse', full: 'raveFull' }, comps: { lo: 'synth:half', hi: 'synth:eighth' }, gang: 'sync' }],
+  },
+  {
+    id: 'punjabi', name: 'Punjabi', tagline: 'Dhol, tumbi and bhangra on the dance floor',
+    prof: {
+      theme: 'fields', lead: 'vox', bass: 'bhangra', scale: 'mixolydian', body: 'mid', hook: 'bounce', range: { A: [0, 7], B: [2, 9], H: [2, 10] },
+      templates: { std: POP_STD, long: POP_LONG }, kits: { intro: 'dholki', verse: 'bhangraL', full: 'bhangraF', brk: 'none' },
+      comps: { lo: 'harmonium:hold', hi: 'tumbi:sync' }, voices: { v: 'voxv', p: 'voxv', h: 'vox', b: 'tumbi' },
+      syl: 'bhangra', dbl: 'tumbi', gang: 'sync', female: false, grit: true, acoustic: false, bigSnare: false,
+    },
+    slots: [
+      { id: 'gidha-night', title: 'Gidha Night', bpm: 96, root: 60, prog: [0, 6, 3, 0], seed: 501, shift: 0, motif: '4 - 4 5 . 4 2 -', syl: 'gidha', female: true, grit: false,
+        bass: 'bhangraSlow', drums: { intro: 'dholki', verse: 'dholki', full: 'dholkiFull' }, comps: { lo: 'harmonium:hold', hi: 'harmonium:half' } },
+      { id: 'pind-party', title: 'Pind Party', bpm: 100, root: 52, prog: [0, 6, 0, 3], seed: 509, shift: 14, motif: '4 4 . 5 4 . 2 .', syl: 'oye',
+        bass: 'bhangraSlow', drums: { verse: 'bhangraL', full: 'bhangraF' } },
+      { id: 'sarson-sunrise', title: 'Sarson Sunrise', bpm: 104, root: 53, scale: 'major', prog: [0, 4, 5, 3], seed: 521, shift: -12, motif: '2 - 4 . 5 - 4 2', syl: 'bhangra',
+        drums: { verse: 'bhangraL', full: 'bhangraF' }, comps: { lo: 'harmonium:half', hi: 'tumbi:eighth' } },
+      { id: 'dhol-dhamaka', title: 'Dhol Dhamaka', bpm: 108, root: 52, scale: 'harmonic', prog: [0, 3, 0, 4], seed: 523, shift: 22, motif: '4 4 . 4 5 . 7 5', syl: 'tappe',
+        drums: { verse: 'bhangraL', full: 'bhangraF' }, comps: { lo: 'harmonium:hold', hi: 'tumbi:sync' } },
+      { id: 'tumbi-tarang', title: 'Tumbi Tarang', bpm: 110, root: 50, voxTrim: -2.5, scale: 'harmonic', prog: [0, 5, 3, 4], seed: 541, shift: -18, motif: '4 . 5 . 4 2 . 4', syl: 'oye',
+        bass: 'pbPop', drums: { intro: 'light', verse: 'pbPopL', full: 'pbPopF' }, comps: { lo: 'tumbi:half', hi: 'tumbi:eighth' }, dbl: 'pluck' },
+      { id: 'chandigarh-cruise', title: 'Chandigarh Cruise', bpm: 98, root: 53, voxTrim: -2.5, prog: [0, 6, 3, 6], seed: 547, shift: 28, motif: '2 . 4 5 . 4 2 .', syl: 'bhangra',
+        bass: 'pbPop', drums: { intro: 'kicks', verse: 'pbPopL', full: 'pbPopF' }, comps: { lo: 'harmonium:half', hi: 'tumbi:sync' } },
+      { id: 'desi-swagger', title: 'Desi Swagger', bpm: 142, root: 48, scale: 'minor', prog: [0, 5, 2, 6], seed: 557, shift: -24, motif: '4 - 4 . 5 . 4 2', syl: 'tappe',
+        bass: '808', drums: { intro: 'none', verse: 'pbTrapL', full: 'pbTrapF' }, comps: { lo: 'harmonium:hold', hi: 'tumbi:sync' } },
+      { id: 'vaisakhi-vibes', title: 'Vaisakhi Vibes', bpm: 112, root: 53, scale: 'dorian', prog: [0, 3, 4, 3], seed: 563, shift: 34, motif: '4 4 5 4 2 4 5 -', syl: 'oye',
+        drums: { verse: 'bhangraL', full: 'bhangraFast' }, comps: { lo: 'harmonium:half', hi: 'tumbi:eighth' } },
+      { id: 'bhangra-blast', title: 'Bhangra Blast', bpm: 124, root: 51, scale: 'harmonic', prog: [0, 4, 5, 3], seed: 569, shift: -30, motif: '4 . 4 5 . 7 . 5', syl: 'tappe', gang: 'off',
+        drums: { verse: 'bhangraL', full: 'bhangraFast' }, comps: { lo: 'tumbi:half', hi: 'tumbi:eighth' } },
+      { id: 'desi-drop', title: 'Desi Drop', bpm: 128, root: 50, voxTrim: -2.5, scale: 'phrygian', prog: [0, 1, 0, 6], seed: 571, shift: 10, motif: '7 - 5 - 4 5 7 -', syl: 'bhangra', gang: 'off',
+        bass: 'pbPop', drums: { intro: 'kicks', verse: 'pbPopL', full: 'pbPopF' }, comps: { lo: 'harmonium:half', hi: 'tumbi:eighth' } }],
   },
 ];
 

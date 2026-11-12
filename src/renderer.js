@@ -11,6 +11,8 @@ const THEMES = {
   aurora: { deco: 'pine', palettes: [{ a: 152, b: 204 }, { a: 178, b: 262 }, { a: 96, b: 172 }, { a: 292, b: 204 }] },
   inferno: { deco: 'spike', palettes: [{ a: 356, b: 338 }, { a: 22, b: 2 }, { a: 288, b: 332 }, { a: 42, b: 12 }] },
   disco: { deco: 'star', palettes: [{ a: 322, b: 292 }, { a: 44, b: 328 }, { a: 188, b: 276 }, { a: 288, b: 204 }] },
+  rave: { deco: 'led', palettes: [{ a: 186, b: 288 }, { a: 318, b: 262 }, { a: 128, b: 188 }, { a: 28, b: 346 }] },
+  fields: { deco: 'wheat', palettes: [{ a: 44, b: 22 }, { a: 28, b: 352 }, { a: 8, b: 38 }, { a: 62, b: 30 }] },
   stage: { deco: 'amp', palettes: [{ a: 28, b: 6 }, { a: 352, b: 18 }, { a: 206, b: 232 }, { a: 48, b: 10 }] },
 };
 /** First palette of a track's world, rotated by the track's own hue shift. */
@@ -299,6 +301,19 @@ export class Renderer {
       c.fillStyle = body; c.strokeStyle = line;
       for (let i = 0; i < 3; i++) { const base = 0.5 + i * 0.95 * tall, wd = 0.95 - i * 0.24; poly([[-wd, base], [0, base + 1.5 * tall], [wd, base]]); c.fill(); c.stroke(); }
       poly([[0, 0], [0, 0.5]], false); c.strokeStyle = dim; c.stroke();
+    } else if (type === 'led') {
+      // an LED tower: stacked bars that flicker with the beat
+      const bars = 5 + (n % 3), wd = 0.5;
+      poly([[-wd - 0.12, 0], [-wd - 0.12, bars * 0.62 + 0.2], [wd + 0.12, bars * 0.62 + 0.2], [wd + 0.12, 0]]); c.fillStyle = body; c.fill(); c.strokeStyle = dim; c.stroke();
+      for (let i = 0; i < bars; i++) { const on = Math.sin(time * 6 + n * 1.7 + i * 1.3) * 0.5 + 0.5 + pulse * 0.4 > 0.45 + i * 0.07; poly([[-wd, 0.12 + i * 0.62], [-wd, 0.6 + i * 0.62], [wd, 0.6 + i * 0.62], [wd, 0.12 + i * 0.62]]); c.fillStyle = hsl(i < bars - 2 ? a : b, 100, on ? 70 : 22, on ? 0.95 : 0.5); c.fill(); }
+    } else if (type === 'wheat') {
+      // a sheaf of mustard-gold stalks swaying in the wind
+      const sway = Math.sin(time * 1.6 + n * 0.9) * 0.12, hgt = 2.3 * tall;
+      c.strokeStyle = dim;
+      for (let i = -2; i <= 2; i++) { poly([[i * 0.2, 0], [i * 0.3 + sway * (1 + Math.abs(i) * 0.3), hgt]], false); c.stroke(); }
+      c.fillStyle = hsl(a, 100, 66, 0.95);
+      for (let i = -2; i <= 2; i++) { const tx = i * 0.3 + sway * (1 + Math.abs(i) * 0.3); poly([[tx, hgt - 0.5], [tx + 0.14, hgt - 0.1], [tx, hgt + 0.55], [tx - 0.14, hgt - 0.1]]); c.fill(); }
+      const bx = 0, by = 0.55; poly([[bx - 0.42, by - 0.1], [bx + 0.42, by - 0.1], [bx + 0.3, by + 0.18], [bx - 0.3, by + 0.18]]); c.fillStyle = hsl(b, 90, 52, 0.95); c.fill(); c.strokeStyle = line; c.stroke();
     } else {
       const hgt = 3.6 * tall;
       poly([[-0.3, 0], [0.55, hgt], [0.3, 0]]); c.fillStyle = body; c.fill(); c.strokeStyle = line; c.stroke();
@@ -392,6 +407,41 @@ export class Renderer {
     for (let i = 0; i < 22; i++) { const t = (time * 0.45 + i * 0.173) % 1, ang = i * 2.399 + time * 0.2, d = r * (1 + t * 1.7); c.fillStyle = hsl(a + i * 9, 100, 85, (1 - t) * (0.55 + pulse * 0.3)); const sz = 2.2 * (1 - t) + 0.8; c.fillRect(cx + Math.cos(ang) * d - sz / 2, cy + Math.sin(ang) * d * 0.8 - sz / 2, sz, sz); }
     c.globalCompositeOperation = 'source-over';
     this.ridge(c, w, hy, this.ridgeB, hy * 0.12, shift, hsl(b, 60, 5), hsl(a, 100, 68, 0.8));
+  }
+  rave(c, w, hy, a, b, time, pulse, shift) {
+    // dark warehouse: laser fan, a grid, and an EQ wall that jumps with the bass
+    c.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 7; i++) {
+      const hue = [a, b, a + 60, b + 40][i % 4], ox = w * (0.5 + (i - 3) * 0.02) - shift * 0.3, ang = Math.sin(time * (0.6 + i * 0.07) + i * 1.9) * 0.9 + (i - 3) * 0.16;
+      c.strokeStyle = hsl(hue, 100, 68, 0.3 + pulse * 0.35); c.lineWidth = 1.5 + pulse * 1.5; c.beginPath(); c.moveTo(ox, hy * 0.04); c.lineTo(ox + Math.sin(ang) * w * 1.4, hy * 0.04 + Math.cos(ang) * hy * 1.5); c.stroke();
+    }
+    c.lineWidth = 1; c.strokeStyle = hsl(b, 100, 60, 0.16);
+    for (let i = 1; i < 8; i++) { const y = hy * (i / 8) ** 1.6; c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke(); }
+    const cols = 24, bw = w / cols;
+    for (let i = 0; i < cols; i++) {
+      const lvl = 0.18 + 0.5 * (Math.sin(time * 5.2 + i * 0.9) * 0.5 + 0.5) * (0.45 + pulse * 0.75) * (0.55 + 0.45 * Math.sin(i * 0.5 + 1.2)), bh = hy * Math.min(0.62, lvl);
+      const g = c.createLinearGradient(0, hy - bh, 0, hy); g.addColorStop(0, hsl(a, 100, 70, 0.55)); g.addColorStop(1, hsl(b, 100, 55, 0.08)); c.fillStyle = g; c.fillRect(i * bw + 1, hy - bh, bw - 2, bh);
+    }
+    c.globalCompositeOperation = 'source-over';
+    this.ridge(c, w, hy, this.ridgeB, hy * 0.1, shift, hsl(b, 70, 4), hsl(a, 100, 66, 0.8));
+  }
+  fields(c, w, hy, a, b, time, pulse, shift) {
+    // Punjab at golden hour: a big sun with turning rays above rows of crops
+    const r = Math.min(w * 0.22, hy * 0.4) * (1 + pulse * 0.04), cx = w / 2 - shift * 0.3, cy = hy * 0.6;
+    c.globalCompositeOperation = 'lighter';
+    const halo = c.createRadialGradient(cx, cy, r * 0.5, cx, cy, r * 2.6); halo.addColorStop(0, hsl(a, 100, 62, 0.5 + pulse * 0.2)); halo.addColorStop(1, hsl(a, 100, 50, 0)); c.fillStyle = halo; c.fillRect(0, 0, w, hy);
+    c.fillStyle = hsl(a + 8, 100, 70, 0.14 + pulse * 0.08);
+    for (let i = 0; i < 14; i++) { const ang = time * 0.12 + i * (6.283 / 14), wd = 0.1; c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx + Math.cos(ang - wd) * w, cy + Math.sin(ang - wd) * w); c.lineTo(cx + Math.cos(ang + wd) * w, cy + Math.sin(ang + wd) * w); c.closePath(); c.fill(); }
+    for (let i = 0; i < 20; i++) { const life = (time * 0.07 + i * 0.211) % 1, x = ((i * 0.371) % 1) * w + Math.sin(time * 0.8 + i) * 10; c.fillStyle = hsl(i % 2 ? a : b + 10, 100, 72, (1 - life) * 0.8); c.fillRect(x, hy * (1 - life * 0.9), 2.5, 2.5); }
+    c.globalCompositeOperation = 'source-over';
+    const sun = c.createLinearGradient(0, cy - r, 0, cy + r); sun.addColorStop(0, hsl(a + 10, 100, 72)); sun.addColorStop(1, hsl(b, 100, 56)); c.fillStyle = sun; c.beginPath(); c.arc(cx, cy, r, 0, 6.283); c.fill();
+    this.ridge(c, w, hy, this.ridgeA, hy * 0.2, shift * 0.5, hsl(b, 60, 10), hsl(a, 100, 60, 0.5));
+    for (let row = 0; row < 5; row++) {
+      const y0 = hy * (0.82 + row * 0.036), sw = Math.sin(time * 1.4 + row) * 3;
+      c.strokeStyle = hsl(a + row * 4, 85, 38 + row * 4, 0.9); c.lineWidth = 1.5 + row * 0.4; c.beginPath();
+      for (let x = -10; x <= w + 10; x += 9) { const yy = y0 + Math.sin(x * 0.02 + row * 2 - shift * 0.02) * 2; c.moveTo(x, yy + 7 + row); c.lineTo(x + sw * 0.4, yy - 4 - row * 1.6); }
+      c.stroke();
+    }
   }
   stage(c, w, hy, a, b, time, pulse, shift) {
     // truss with spotlights, haze, then the crowd with raised hands

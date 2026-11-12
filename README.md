@@ -2,7 +2,7 @@
 
 An original neon rhythm arcade game for phones. Hold and drag sideways; the ball hops to the music and you steer it onto every tile.
 
-**Version 0.4 — pop and rock.** Two new genres of ten original tracks each, with synthesised singers, guitars, keys, brass and percussion, on top of seven worlds and 45 tracks in all. Everything from 0.3 and the 0.2 overhaul is still here: a full synthesised soundtrack, a perspective runway with a different world per genre, stars, perfect streaks, fever, one continue per run and a live menu preview.
+**Version 0.5 — drum & bass and punjabi.** Two more genres of ten original tracks each (170–180 BPM rollers with reese basses and an MC, and dhol-driven bhangra with tumbi, harmonium and a trap-bhangra track), joining pop and rock for nine worlds and 65 tracks in all. Everything from 0.3 and the 0.2 overhaul is still here: a full synthesised soundtrack, a perspective runway with a different world per genre, stars, perfect streaks, fever, one continue per run and a live menu preview.
 
 ## What is in the game
 
@@ -62,7 +62,7 @@ GitHub Actions runs the syntax, unit, build and browser checks and uploads the w
 | Part | Deliverable | Status |
 | --- | --- | --- |
 | 1 | Playable portrait core | Done |
-| 2 | Music, melody-driven charts, visual overhaul, 45 tracks in seven genres | Done through 0.4 except latency calibration, listening review and mastered audio; see QA notes |
+| 2 | Music, melody-driven charts, visual overhaul, 65 tracks in nine genres | Done through 0.5 except latency calibration, listening review and mastered audio; see QA notes |
 | 3 | Progression, cosmetics, practice and challenges | Stars and bests done; the rest planned |
 | 4 | Offline installation, Android package and device profiling | Planned |
 | 5 | Store readiness, closed testing and release | Planned |
