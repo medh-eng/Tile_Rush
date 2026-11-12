@@ -33,7 +33,7 @@ const buzz = (ms) => { try { navigator.vibrate?.(ms); } catch { /* unsupported *
 const clock = (seconds) => `${Math.floor(seconds / 60)}:${String(Math.round(seconds % 60)).padStart(2, '0')}`;
 const starText = (n) => `<b>${'★'.repeat(n)}</b>${'★'.repeat(3 - n)}`;
 
-// --- menus: genres, then the five tracks of a genre ---
+// --- menus: genres, then the tracks of a genre ---
 const genreOf = (track) => GENRES.find((g) => g.id === track.genre);
 const starsOf = (list) => list.reduce((n, t) => n + record(t.id).stars, 0);
 const isMenu = () => mode === 'home' || mode === 'genre';

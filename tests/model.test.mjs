@@ -3,16 +3,51 @@ import assert from 'node:assert/strict';
 import { TRACKS, GENRES, Run, createChart, judge, autoX, clamp, TILE_HALF, GRACE, PERFECT } from '../src/model.js';
 import { compile, chord, degree } from '../src/songs.js';
 
-test('five genres each hold five tracks in rising difficulty, with unique ids and their own tunes', () => {
-  assert.equal(GENRES.length, 5); assert.equal(TRACKS.length, 25);
-  assert.equal(new Set(TRACKS.map((t) => t.id)).size, 25); assert.equal(new Set(TRACKS.map((t) => t.title)).size, 25);
+test('seven genres: five of five tracks and pop and rock of ten, each rising in difficulty with unique ids and tunes', () => {
+  assert.equal(GENRES.length, 7); assert.equal(TRACKS.length, 45);
+  assert.equal(new Set(TRACKS.map((t) => t.id)).size, 45); assert.equal(new Set(TRACKS.map((t) => t.title)).size, 45);
+  const ladder = { 5: ['Easy', 'Easy', 'Medium', 'Hard', 'Expert'], 10: ['Easy', 'Easy', 'Easy', 'Medium', 'Medium', 'Medium', 'Hard', 'Hard', 'Expert', 'Expert'] };
   for (const genre of GENRES) {
-    assert.equal(genre.tracks.length, 5);
-    assert.deepEqual(genre.tracks.map((t) => t.difficulty), ['Easy', 'Easy', 'Medium', 'Hard', 'Expert']);
-    assert.deepEqual(genre.tracks.map((t) => t.no), [1, 2, 3, 4, 5]);
+    const size = genre.id === 'pop' || genre.id === 'rock' ? 10 : 5;
+    assert.equal(genre.tracks.length, size, `${genre.id} size`);
+    assert.deepEqual(genre.tracks.map((t) => t.difficulty), ladder[size]);
+    assert.deepEqual(genre.tracks.map((t) => t.no), genre.tracks.map((_, i) => i + 1));
     for (const t of genre.tracks) assert.equal(t.genre, genre.id);
-    assert.ok(genre.tracks[4].minGap <= genre.tracks[0].minGap && genre.tracks[4].reach >= genre.tracks[0].reach, `${genre.id} ends harder than it starts`);
-    assert.equal(new Set(genre.tracks.map((t) => t.phrases.H)).size, 5, `${genre.id} hooks differ`);
+    assert.ok(genre.tracks[size - 1].minGap <= genre.tracks[0].minGap && genre.tracks[size - 1].reach >= genre.tracks[0].reach, `${genre.id} ends harder than it starts`);
+    assert.equal(new Set(genre.tracks.map((t) => t.phrases.H)).size, size, `${genre.id} hooks differ`);
+  }
+});
+
+test('pop and rock: ten songs each with a singer, real kits, bass lines and instruments for every section', async () => {
+  const { DRUMS, BASS, COMPS, SYLSETS } = await import('../src/songs.js');
+  const kinds = ['synth', 'brass', 'piano', 'epiano', 'clean', 'power', 'chug'], leads = ['vox', 'voxv', 'epiano', 'piano', 'brass', 'gtr', 'bell', 'pluck', 'super', 'saw', 'cowbell'];
+  for (const genre of GENRES.filter((g) => g.id === 'pop' || g.id === 'rock')) {
+    for (const track of genre.tracks) {
+      assert.ok(track.syl && track.syl.v.length && track.syl.h.length && track.syl.g.length, `${track.id} has syllables`);
+      assert.equal(track.female, genre.id === 'pop'); assert.equal(track.grit, genre.id === 'rock');
+      assert.ok(BASS[track.bass], `${track.id} bass ${track.bass}`);
+      const song = compile(track); let sung = 0, comps = 0, drummed = 0;
+      for (const sec of song.sections) {
+        if (sec.drums !== 'none') assert.ok(DRUMS[sec.drums], `${track.id} ${sec.n}: kit ${sec.drums}`);
+        if (DRUMS[sec.drums]?.k) drummed++;
+        if (sec.comp) { assert.ok(kinds.includes(sec.comp.kind) && sec.comp.pat, `${track.id} ${sec.n}: comp`); comps++; }
+        if (sec.lead) { assert.ok(leads.includes(sec.voice || track.lead), `${track.id} ${sec.n}: voice ${sec.voice}`); if (['vox', 'voxv'].includes(sec.voice)) sung++; }
+        if (sec.gang) assert.equal(sec.gang.length, 16);
+        if (sec.dbl) assert.ok(leads.includes(sec.dbl));
+      }
+      assert.ok(sung >= 3 && comps >= 5 && drummed >= 4, `${track.id}: ${sung} sung sections, ${comps} comped, ${drummed} drummed`);
+      assert.ok(song.sections.some((s) => s.gang) && song.sections.some((s) => s.harm || s.crash), `${track.id} has crowd or backing vocals`);
+    }
+  }
+  for (const name of Object.keys(COMPS)) assert.equal(COMPS[name].length, 16, name);
+  for (const [name, set] of Object.entries(SYLSETS)) assert.ok(set.v.length && set.h.length && set.g.length, name);
+});
+
+test('pop and rock songs run between 65 and 105 seconds and use the long layout only from 140 BPM', () => {
+  for (const track of TRACKS.filter((t) => t.genre === 'pop' || t.genre === 'rock')) {
+    const song = compile(track);
+    assert.equal(song.bars, track.bpm >= 140 ? 60 : 40, track.id); assert.ok(song.duration >= 65 && song.duration <= 105, `${track.id} ${song.duration}`);
+    assert.ok(song.sections.find((s) => s.e >= 1), `${track.id} has a chorus for the menu preview`);
   }
 });
 
