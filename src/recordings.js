@@ -1,7 +1,7 @@
 // Real recorded performances. No oscillators, pitch shifting or time stretching.
 // Buffers are decoded lazily; only two short stereo excerpts are retained.
 export class RecordingBank {
-  constructor(ctx, { fetcher = globalThis.fetch, maxBuffers = 2 } = {}) {
+  constructor(ctx, { fetcher = (input) => globalThis.fetch(input), maxBuffers = 2 } = {}) {
     this.ctx = ctx; this.fetcher = fetcher; this.maxBuffers = maxBuffers;
     this.buffers = new Map(); this.pending = new Map(); this.active = null;
     this.master = ctx.createGain(); this.master.connect(ctx.destination);

@@ -281,6 +281,7 @@ export class Soundtrack {
       }
       catch (error) {
         if (id !== this.session) return false;
+        console.warn('Piano recording preparation failed:', error.message);
         this.error = error; await this.stop();
         if (this.ctx.state === 'running') { try { await this.ctx.suspend(); } catch { /* unavailable */ } }
         return false;

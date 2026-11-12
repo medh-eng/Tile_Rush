@@ -26,6 +26,7 @@ try {
   const options = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 };
   const context = await browser.newContext({ ...options, ...(process.env.NO_VIDEO ? {} : { recordVideo: { dir: 'test-results/video', size: { width: 390, height: 844 } } }) });
   const page = await context.newPage(); page.on('pageerror', (e) => errors.push(e.message));
+  page.on('console', msg => { if (msg.text().includes('Piano recording preparation failed:')) console.log('BROWSER AUDIO:',msg.text()); });
   // Test-only handle on the real audio context; the game exposes only a read-only clock.
   await page.addInitScript(() => { const Real = window.AudioContext; window.AudioContext = class extends Real { constructor(...args) { super(...args); window.testAudio = this; } }; });
   await page.goto(url);

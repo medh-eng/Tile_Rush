@@ -54,3 +54,10 @@ test('recorded seek schedules exact offsets and pause/stop removes the previous 
   bank.play({duration:48},8,20.35);assert.ok(ctx.voices[0].source.stopped);assert.equal(ctx.voices[1].offset,20.35);
   bank.setVolume(0);assert.equal(ctx.volumes.at(-1),0);bank.stop();assert.ok(ctx.voices[1].source.stopped);assert.equal(bank.active,null);
 });
+
+test('the default fetch adapter preserves the browser global receiver',async()=>{
+  const original=globalThis.fetch;
+  globalThis.fetch=async function(){assert.equal(this,globalThis);return {ok:true,arrayBuffer:async()=>new ArrayBuffer(8)};};
+  try{const bank=new RecordingBank(fakeContext());await bank.load(piano[0].recording);assert.equal(bank.buffers.size,1);}
+  finally{globalThis.fetch=original;}
+});
