@@ -61,7 +61,7 @@ try {
   assert.equal(await page.locator('.track').nth(1).getAttribute('aria-pressed'), 'true');
   await page.waitForFunction(() => window.testAudio?.state === 'running'); check('choosing a track starts its audible preview');
   await tap(page.locator('.track').first());
-  await tap(page.locator('#play'));
+  await page.waitForFunction(() => !document.querySelector('#play').disabled); await tap(page.locator('#play'));
   await page.waitForFunction(() => document.querySelector('#score').textContent !== '0');
   assert.equal(await page.evaluate(() => window.tileRush.mode), 'playing');
   await page.screenshot({ path: 'test-results/03-gameplay.png' }); check('play starts after a count-in and the first centred tiles score');
@@ -95,7 +95,7 @@ try {
   const track = TRACKS.find((t) => t.id === (process.env.TRACK || 'bach-c-major')), chart = createChart(track), cdp = await context.newCDPSession(page);
   await page.locator('#genre').isVisible() ? await tap(page.locator('#back')) : null;
   await openTrack(page, track);
-  await tap(page.locator('#play'));
+  await page.waitForFunction(() => !document.querySelector('#play').disabled); await tap(page.locator('#play'));
   await page.waitForFunction(() => window.tileRush.mode === 'playing');
   let finger = 195; const pxPerLane = 390 * 0.42 / 1.15, touch = (type, x) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y: 640, id: 1 }] });
   await touch('touchStart', finger);
@@ -120,7 +120,7 @@ try {
   await tap(page.getByRole('button', { name: 'Back to tracks' }));
   assert.equal(await page.locator(`.track[data-id="${track.id}"] .stars b`).textContent(), '★★★'); check(`a complete ${track.title} run with real touch input earns three stars`);
 
-  await tap(page.locator('#play'));
+  await page.waitForFunction(() => !document.querySelector('#play').disabled); await tap(page.locator('#play'));
   await page.evaluate(() => window.dispatchEvent(new Event('blur')));
   await page.getByRole('heading', { name: 'Paused' }).waitFor();
   check('an interruption during recording startup pauses safely');
