@@ -82,3 +82,7 @@ Acceptance: all prior gates met, current store requirements checked, the publish
 Music appeal, touch feel, latency and chart readability matter more than adding menus. The simple synth tracks are prototype material. Bluetooth latency, touch-to-display delay, battery impact, audio recovery during calls and sustained low-end performance have not been established by desktop automation. Browser success does not substitute for phone testing.
 
 Keep the next milestone focused on those points. Do not describe the prototype as a published Android app, a proven viral product, or a finished content catalogue.
+
+## Status after version 0.2
+
+Parts 1 and most of Part 2 are implemented: five original tracks with sectioned arrangements, charts generated from each lead melody, a full synthesiser, and a new perspective renderer and interface. The Part 1 design notes above (teal landscape, two tracks, one tile per beat, 100/60 scoring) describe the first prototype and are superseded by [the architecture notes](ARCHITECTURE.md). Still open from Part 2: listening review and mastering, a latency calibration screen, and device trials. See [0.2 QA](PART_2_QA.md).
