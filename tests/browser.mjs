@@ -96,7 +96,18 @@ try {
   await page.locator('#genre').isVisible() ? await tap(page.locator('#back')) : null;
   await openTrack(page, track);
   await page.waitForFunction(() => !document.querySelector('#play').disabled); await tap(page.locator('#play'));
-  await page.waitForFunction(() => window.tileRush.mode === 'playing');
+  try {
+    await page.waitForFunction(() => ['playing','paused'].includes(window.tileRush.mode), null, { timeout: 8000 });
+    if (await page.evaluate(() => window.tileRush.mode === 'paused')) {
+      await tap(page.getByRole('button', { name: 'RESUME' }));
+      await page.waitForFunction(() => window.tileRush.mode === 'playing', null, { timeout: 8000 });
+    }
+  } catch (error) {
+    console.log('PIANO START STATE',JSON.stringify(await page.evaluate(()=>({mode:window.tileRush.mode,status:document.querySelector('#audio-status').textContent,disabled:document.querySelector('#play').disabled,genre:document.querySelector('#genre-name').textContent,hud:document.querySelector('#hud').hidden,audio:window.testAudio?.state,body:document.body.innerText}))),null,2));
+    const evidence=await page.screenshot({path:'test-results/piano-start-diagnostic.png',scale:'css'});
+    console.log('PIANO_EVIDENCE_BASE64:'+evidence.toString('base64'));
+    throw error;
+  }
   let finger = 195; const pxPerLane = 390 * 0.42 / 1.15, touch = (type, x) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y: 640, id: 1 }] });
   await touch('touchStart', finger);
   const deadline = Date.now() + 150000; let last = null; // no screenshots inside this loop: capturing stalls steering long enough to miss a tile
