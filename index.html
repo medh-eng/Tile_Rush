@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="theme-color" content="#07030f">
-<meta name="description" content="Tile Rush: a one-finger neon rhythm game. Hold, drag and ride five original tracks.">
+<meta name="description" content="Tile Rush: a one-finger neon rhythm game. Hold, drag and ride 25 original tracks across five genres.">
 <link rel="icon" href="./public/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./styles.css">
 <title>Tile Rush</title>
@@ -15,16 +15,27 @@
 
   <section id="home" class="screen">
     <header class="top-row">
-      <span class="chip">5 ORIGINAL TRACKS</span>
+      <span class="chip">25 ORIGINAL TRACKS</span>
       <button id="sound-home" class="icon-button sound-toggle" aria-label="Mute audio" aria-pressed="false"></button>
     </header>
     <div class="logo" aria-label="Tile Rush">
       <h1><span>TILE</span><span>RUSH</span></h1>
       <p>Ride the beat. Land every tile.</p>
     </div>
+    <div class="picker grow">
+      <div class="picker-head"><h2>Choose a genre</h2><span id="total-stars" class="star-total"></span></div>
+      <div id="genres" class="genre-list" role="group" aria-label="Choose a genre"></div>
+    </div>
+  </section>
+
+  <section id="genre" class="screen" hidden>
+    <header class="top-row">
+      <button id="back" class="icon-button" aria-label="Back to genres"><span class="back-icon" aria-hidden="true"></span></button>
+      <div class="genre-title"><small id="genre-sub">GENRE</small><h2 id="genre-name"></h2></div>
+      <button id="sound-genre" class="icon-button sound-toggle" aria-label="Mute audio" aria-pressed="false"></button>
+    </header>
     <div class="spacer"></div>
     <div class="picker">
-      <div class="picker-head"><h2>Choose your track</h2><span id="total-stars" class="star-total"></span></div>
       <div id="tracks" class="track-list" role="group" aria-label="Choose a track"></div>
     </div>
     <footer class="launch">

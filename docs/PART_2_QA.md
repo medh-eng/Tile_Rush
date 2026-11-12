@@ -1,15 +1,17 @@
-# Version 0.2 QA
+# Version 0.3 QA
 
 ## Checks performed
 
 - `npm run check`, `npm test` (11 unit tests: song compilation, chart reachability and determinism, judgement, scoring, revive, clock pause/seek/resume, start cancellation, silent fallback) and `npm run build` pass.
 - `npm run test:browser` passes in mobile-emulated Chrome (390×844, touch): four portrait layouts, menu preview, count-in, pause/resume, mute, miss → continue → try again, persistent bests, **a complete Neon Horizon run steered with real touch events to three stars**, landscape prompt, and play with Web Audio and storage removed. No uncaught page errors.
-- Every track was rendered with `renderOffline()` in Chrome and measured per section: no clipped samples, peaks 0.75–0.88, full sections around −12 to −14 dB RMS.
+- Every one of the 25 tracks was rendered with `renderOffline()` in Chrome and measured: see the results in the pull request notes. The first five were checked in 0.2 (no clipping, peaks 0.75–0.88).
+- The genre and track pages were reviewed from screenshots at 390×844 and 320×568; tests check that every genre lists five tracks and that Play stays on screen.
 - Screens were reviewed from screenshots of all five tracks, the menu, the miss dialog and the result dialog.
 
 ## Not verified
 
-- **How the music sounds.** Levels and clipping were measured; the arrangements were written from music theory and have not been auditioned by ear. Expect to want changes to melodies, sounds and balance after listening.
+- **How the music sounds.** Levels and clipping were measured; nobody has listened. The five original tracks were written by hand and the other twenty have generated melodies over hand-chosen chords, so some will be weaker than others. Expect to keep some, rework some and replace a few after listening.
+- **Fairness of the hard charts.** Reachability is tested (every tile can be reached from the last at the track's reach rate, and a flawless autopilot completes all 25), but only a full run by touch on Neon Horizon was played in a browser. Expert tracks have not been played by a person.
 - **Feel on a real phone.** Touch latency, Bluetooth delay, frame rate, heat and battery were not measured. The headless test machine has no GPU.
 - **iOS Safari.** Only Chrome was run.
 

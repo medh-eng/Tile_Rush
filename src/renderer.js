@@ -11,7 +11,8 @@ const THEMES = {
   aurora: { deco: 'pine', palettes: [{ a: 152, b: 204 }, { a: 178, b: 262 }, { a: 96, b: 172 }, { a: 292, b: 204 }] },
   inferno: { deco: 'spike', palettes: [{ a: 356, b: 338 }, { a: 22, b: 2 }, { a: 288, b: 332 }, { a: 42, b: 12 }] },
 };
-export const themeColours = (theme) => THEMES[theme].palettes[0];
+/** First palette of a track's world, rotated by the track's own hue shift. */
+export const themeColours = (track) => { const p = THEMES[track.theme].palettes[0], s = track.shift || 0; return { a: p.a + s, b: p.b + s }; };
 
 const hsl = (h, s, l, a = 1) => `hsla(${((h % 360) + 360) % 360},${s}%,${l}%,${a})`;
 const mixHue = (from, to, t) => from + ((((to - from) % 360) + 540) % 360 - 180) * t;
@@ -38,9 +39,9 @@ export class Renderer {
   }
   setRun(run) {
     this.run = run; this.theme = THEMES[run.track.theme]; this.particles = []; this.rings = []; this.beams = []; this.trail = [];
-    this.section = -1; this.flash = 0; this.shake = 0; this.camX = 0; this.pal = { ...this.theme.palettes[0] };
+    this.section = -1; this.flash = 0; this.shake = 0; this.camX = 0; this.pal = { ...this.palette(0) };
   }
-  palette(sectionIndex) { const list = this.theme.palettes; return list[((sectionIndex % list.length) + list.length) % list.length]; }
+  palette(sectionIndex) { const list = this.theme.palettes, p = list[((sectionIndex % list.length) + list.length) % list.length], s = this.run.track.shift || 0; return { a: p.a + s, b: p.b + s }; }
 
   // --- events from the game ---
   hit(note, result, streak) {

@@ -1,5 +1,5 @@
 // Screen flow, input and persistence. The soundtrack clock is the only source of game time.
-import { TRACKS, Run, clamp, autoX } from './model.js';
+import { TRACKS, GENRES, Run, clamp, autoX } from './model.js';
 import { compile } from './songs.js';
 import { Soundtrack } from './audio.js';
 import { Renderer, themeColours } from './renderer.js';
@@ -18,9 +18,10 @@ let records = read(STORE, {});
 if (!records || typeof records !== 'object' || Array.isArray(records)) records = {};
 const record = (id) => { const r = records[id]; return r && typeof r === 'object' ? { score: Number(r.score) || 0, stars: clamp(Number(r.stars) || 0, 0, 3) } : { score: 0, stars: 0 }; };
 sound.setMuted(read('tile-rush-muted', false) === true);
+selected = TRACKS.find((t) => t.id === read('tile-rush-last', '')) || TRACKS[0];
 
 function syncSound() {
-  for (const id of ['sound', 'sound-home']) { $(id).setAttribute('aria-pressed', String(sound.muted)); $(id).setAttribute('aria-label', sound.muted ? 'Unmute audio' : 'Mute audio'); }
+  for (const id of ['sound', 'sound-home', 'sound-genre']) { $(id).setAttribute('aria-pressed', String(sound.muted)); $(id).setAttribute('aria-label', sound.muted ? 'Unmute audio' : 'Mute audio'); }
 }
 function toggleSound() { sound.setMuted(!sound.muted); write('tile-rush-muted', sound.muted); syncSound(); }
 const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
@@ -32,43 +33,62 @@ const buzz = (ms) => { try { navigator.vibrate?.(ms); } catch { /* unsupported *
 const clock = (seconds) => `${Math.floor(seconds / 60)}:${String(Math.round(seconds % 60)).padStart(2, '0')}`;
 const starText = (n) => `<b>${'★'.repeat(n)}</b>${'★'.repeat(3 - n)}`;
 
-// --- home ---
-function renderTracks() {
+// --- menus: genres, then the five tracks of a genre ---
+const genreOf = (track) => GENRES.find((g) => g.id === track.genre);
+const starsOf = (list) => list.reduce((n, t) => n + record(t.id).stars, 0);
+const isMenu = () => mode === 'home' || mode === 'genre';
+function renderGenres() {
+  $('genres').replaceChildren();
+  for (const genre of GENRES) {
+    const bpm = genre.tracks.map((t) => t.bpm), button = document.createElement('button');
+    button.className = 'genre'; button.dataset.id = genre.id; button.style.setProperty('--th', themeColours(genre.tracks[0]).a);
+    button.innerHTML = `<span class="disc" aria-hidden="true"></span><span class="genre-text"><span class="genre-name">${genre.name}</span><span class="genre-tag">${genre.tagline}</span><span class="genre-info">${genre.tracks.length} tracks · ${Math.min(...bpm)}–${Math.max(...bpm)} BPM · <b>★ ${starsOf(genre.tracks)}/${genre.tracks.length * 3}</b></span></span><span class="chevron" aria-hidden="true"></span>`;
+    button.addEventListener('click', () => showGenre(genre, true));
+    $('genres').append(button);
+  }
+  $('total-stars').textContent = `★ ${starsOf(TRACKS)} / ${TRACKS.length * 3}`;
+}
+function renderTracks(genre) {
   $('tracks').replaceChildren();
-  let total = 0;
-  for (const track of TRACKS) {
+  $('genre-name').textContent = genre.name; $('genre-sub').textContent = `★ ${starsOf(genre.tracks)} / ${genre.tracks.length * 3}`;
+  for (const track of genre.tracks) {
     const best = record(track.id), song = compile(track), button = document.createElement('button');
-    total += best.stars;
-    button.className = 'track'; button.dataset.id = track.id; button.style.setProperty('--th', themeColours(track.theme).a);
+    button.className = 'track'; button.dataset.id = track.id; button.style.setProperty('--th', themeColours(track).a);
     button.setAttribute('aria-pressed', String(selected.id === track.id));
-    button.innerHTML = `<span class="disc" aria-hidden="true"></span><span class="track-title">${track.title}</span><span class="track-info">${track.genre} · ${track.bpm} BPM · ${clock(song.duration)}</span><span class="track-foot"><span class="level">${track.difficulty.toUpperCase()}</span><span class="stars" aria-label="${best.stars} of 3 stars">${starText(best.stars)}</span><span class="best">${best.score ? `BEST ${best.score.toLocaleString()}` : ''}</span></span>`;
+    button.innerHTML = `<span class="no" aria-hidden="true">${track.no}</span><span class="track-main"><span class="track-title">${track.title}</span><span class="track-info">${track.bpm} BPM · ${clock(song.duration)}${best.score ? ` · <span class="best">BEST ${best.score.toLocaleString()}</span>` : ''}</span></span><span class="track-side"><span class="level">${track.difficulty.toUpperCase()}</span><span class="stars" aria-label="${best.stars} of 3 stars">${starText(best.stars)}</span></span>`;
     button.addEventListener('click', () => select(track, true));
     $('tracks').append(button);
   }
-  $('total-stars').textContent = `★ ${total} / ${TRACKS.length * 3}`;
 }
 function select(track, audible) {
   selected = track; unlocked ||= audible;
-  document.documentElement.style.setProperty('--h', themeColours(track.theme).a);
+  document.documentElement.style.setProperty('--h', themeColours(track).a);
   for (const card of $('tracks').children) {
     const on = card.dataset.id === track.id; card.setAttribute('aria-pressed', String(on));
-    if (on) card.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+    if (on) card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
   preview();
 }
-/** The menu backdrop: the selected track's drop, played by an autopilot. Audible once the player has tapped a track. */
+/** The menu backdrop: the selected track's drop, played by an autopilot. Audible once the player has tapped something. */
 async function preview() {
   const id = ++seq, song = compile(selected), drop = song.sections.find((s) => s.e >= 1) || song.sections[0];
   previewFrom = drop.time; previewTo = drop.time + drop.bars * 16 * song.s16;
   const ok = await sound.start(selected, { at: previewFrom, silent: !unlocked, level: 0.6 });
-  if (!ok || id !== seq || mode !== 'home') return;
+  if (!ok || id !== seq || !isMenu()) return;
   run = new Run(selected); run.skipTo(previewFrom); renderer.setRun(run); x = autoX(run.chart, previewFrom); loop();
 }
-function home() {
+function leaveGame() { seq++; clearTimers(); resetInput(); $('modal').hidden = true; $('hud').hidden = true; }
+function showHome() {
   if (busy) return;
-  seq++; clearTimers(); resetInput(); mode = 'home';
-  $('modal').hidden = true; $('hud').hidden = true; $('home').hidden = false;
-  renderTracks(); select(selected, false);
+  leaveGame(); mode = 'home'; $('genre').hidden = true; $('home').hidden = false;
+  renderGenres(); select(selected, false);
+  $('genres').querySelector(`[data-id="${selected.genre}"]`)?.focus({ preventScroll: true });
+}
+function showGenre(genre, audible = false) {
+  if (busy) return;
+  leaveGame(); mode = 'genre'; $('home').hidden = true; $('genre').hidden = false;
+  if (selected.genre !== genre.id) selected = genre.tracks[0];
+  renderTracks(genre); select(selected, audible);
   $('tracks').querySelector('[aria-pressed="true"]')?.focus({ preventScroll: true });
 }
 
@@ -100,9 +120,9 @@ async function start() {
   const id = ++seq;
   try {
     stopLoop(); clearTimers(); resetInput(); mode = 'starting';
-    document.documentElement.style.setProperty('--h', themeColours(selected.theme).a);
+    document.documentElement.style.setProperty('--h', themeColours(selected).a);
     run = new Run(selected); x = 0; renderer.setRun(run); lastTime = -run.song.beat * 4;
-    $('home').hidden = true; $('modal').hidden = true; $('hud').hidden = false; resetHud();
+    $('home').hidden = true; $('genre').hidden = true; $('modal').hidden = true; $('hud').hidden = false; resetHud(); write('tile-rush-last', selected.id);
     $('tutorial').hidden = Object.keys(records).length > 0;
     renderer.resize(); still();
     await sound.start(selected);
@@ -122,7 +142,7 @@ function onHit(result, note, gainedStar) {
 function frame(stamp) {
   raf = 0;
   const elapsed = stamp - lastFrame, dt = Math.min(0.1, Math.max(0, elapsed / 1000)); lastFrame = stamp;
-  if (mode === 'home') {
+  if (isMenu()) {
     if (sound.track && run) {
       let time = sound.time;
       if (time > previewTo) { sound.seek(previewFrom); time = previewFrom; run.skipTo(time); }
@@ -209,7 +229,7 @@ function complete(time) {
   mode = 'complete'; endAt = time + 8; resetInput(); setCount('');
   renderer.celebrate(time); sound.chime('win'); buzz(40);
   later(() => {
-    const better = save(), index = TRACKS.indexOf(selected), next = TRACKS[index + 1];
+    const better = save(), list = genreOf(selected).tracks, next = list[list.indexOf(selected) + 1];
     mode = 'result';
     dialog({
       kicker: better ? 'New personal best' : 'Track complete', title: selected.title, stars: run.stars,
@@ -221,9 +241,10 @@ function complete(time) {
 
 // --- wiring ---
 $('play').addEventListener('click', start); $('pause').addEventListener('click', pause);
-$('sound').addEventListener('click', toggleSound); $('sound-home').addEventListener('click', toggleSound);
+$('sound').addEventListener('click', toggleSound); $('sound-home').addEventListener('click', toggleSound); $('sound-genre').addEventListener('click', toggleSound);
+$('back').addEventListener('click', () => showHome());
 $('modal-primary').addEventListener('click', () => actions.primary?.()); $('modal-secondary').addEventListener('click', () => actions.secondary?.());
-$('home-button').addEventListener('click', home);
+$('home-button').addEventListener('click', () => showGenre(genreOf(selected)));
 canvas.addEventListener('pointerdown', (e) => {
   if (mode !== 'playing' || pointer || !e.isPrimary || e.button !== 0) return;
   pointer = { id: e.pointerId, last: e.clientX }; try { canvas.setPointerCapture(e.pointerId); } catch { /* not capturable */ }
@@ -252,10 +273,10 @@ $('modal').addEventListener('keydown', (e) => {
 });
 function interrupt() {
   resetInput();
-  if (mode === 'home') { seq++; stopLoop(); sound.stop(); }
+  if (isMenu()) { seq++; stopLoop(); sound.stop(); }
   else pause();
 }
-document.addEventListener('visibilitychange', () => { if (document.hidden) interrupt(); else if (mode === 'home') preview(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) interrupt(); else if (isMenu()) preview(); });
 window.addEventListener('blur', () => { if (mode === 'playing' || mode === 'countdown') pause(); });
 window.addEventListener('pagehide', interrupt);
 window.addEventListener('resize', () => { renderer.resize(); if (!raf) still(); });
@@ -263,4 +284,4 @@ window.addEventListener('resize', () => { renderer.resize(); if (!raf) still(); 
 // Read-only view of the clock and ball for automated browser checks.
 globalThis.tileRush = { get time() { return sound.time; }, get x() { return x; }, get mode() { return mode; } };
 
-syncSound(); renderTracks(); select(selected, false);
+syncSound(); renderGenres(); select(selected, false);

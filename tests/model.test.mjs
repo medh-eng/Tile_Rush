@@ -1,10 +1,22 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { TRACKS, Run, createChart, judge, autoX, clamp, TILE_HALF, GRACE, PERFECT } from '../src/model.js';
+import { TRACKS, GENRES, Run, createChart, judge, autoX, clamp, TILE_HALF, GRACE, PERFECT } from '../src/model.js';
 import { compile, chord, degree } from '../src/songs.js';
 
+test('five genres each hold five tracks in rising difficulty, with unique ids and their own tunes', () => {
+  assert.equal(GENRES.length, 5); assert.equal(TRACKS.length, 25);
+  assert.equal(new Set(TRACKS.map((t) => t.id)).size, 25); assert.equal(new Set(TRACKS.map((t) => t.title)).size, 25);
+  for (const genre of GENRES) {
+    assert.equal(genre.tracks.length, 5);
+    assert.deepEqual(genre.tracks.map((t) => t.difficulty), ['Easy', 'Easy', 'Medium', 'Hard', 'Expert']);
+    assert.deepEqual(genre.tracks.map((t) => t.no), [1, 2, 3, 4, 5]);
+    for (const t of genre.tracks) assert.equal(t.genre, genre.id);
+    assert.ok(genre.tracks[4].minGap <= genre.tracks[0].minGap && genre.tracks[4].reach >= genre.tracks[0].reach, `${genre.id} ends harder than it starts`);
+    assert.equal(new Set(genre.tracks.map((t) => t.phrases.H)).size, 5, `${genre.id} hooks differ`);
+  }
+});
+
 test('every track compiles into whole bars with lead notes inside the song', () => {
-  assert.equal(TRACKS.length, 5);
   for (const track of TRACKS) {
     const song = compile(track);
     assert.equal(song.bars, track.sections.reduce((n, s) => n + s.bars, 0));

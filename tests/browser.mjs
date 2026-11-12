@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
-import { TRACKS, createChart, autoX } from '../src/model.js';
+import { TRACKS, GENRES, createChart, autoX } from '../src/model.js';
 
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const port = process.env.PORT || '4173', url = `http://localhost:${port}`;
@@ -13,6 +13,12 @@ await new Promise((resolve, reject) => { server.stdout.once('data', resolve); se
 let browser; const errors = []; let tests = 0;
 const check = (name) => { tests++; console.log(`PASS ${name}`); };
 const tap = (locator) => locator.click({ force: true }); // buttons animate, so skip the stability wait
+// Menus are two pages: genres, then that genre's five tracks.
+const openGenre = async (page, genre) => { await tap(page.locator(`.genre[data-id="${genre.id}"]`)); await page.locator('.track').first().waitFor(); };
+const openTrack = async (page, track) => {
+  if (await page.locator('#home').isVisible()) await openGenre(page, GENRES.find((g) => g.id === track.genre));
+  await tap(page.locator(`.track[data-id="${track.id}"]`));
+};
 try {
   browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
   await mkdir('test-results', { recursive: true });
@@ -22,19 +28,34 @@ try {
   // Test-only handle on the real audio context; the game exposes only a read-only clock.
   await page.addInitScript(() => { const Real = window.AudioContext; window.AudioContext = class extends Real { constructor(...args) { super(...args); window.testAudio = this; } }; });
   await page.goto(url);
-  await page.locator('.track').first().waitFor();
+  await page.locator('.genre').first().waitFor();
   assert.equal(await page.title(), 'Tile Rush');
-  assert.equal(await page.locator('.track').count(), TRACKS.length);
+  assert.equal(await page.locator('.genre').count(), GENRES.length);
   for (const size of [{ width: 320, height: 568 }, { width: 360, height: 740 }, { width: 390, height: 844 }, { width: 430, height: 932 }]) {
     await page.setViewportSize(size);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
-    const play = await page.locator('#play').boundingBox(); assert.ok(play.width >= 44 && play.height >= 44 && play.y + play.height <= size.height);
-    const logo = await page.locator('.logo h1').boundingBox(), list = await page.locator('#tracks').boundingBox(); assert.ok(logo.y + logo.height <= list.y, `logo clears the track list at ${size.width}x${size.height}`);
+    const logo = await page.locator('.logo h1').boundingBox(), list = await page.locator('#genres').boundingBox(), first = await page.locator('.genre').first().boundingBox();
+    assert.ok(logo.y + logo.height <= list.y && first.height >= 44, `logo clears the genre list at ${size.width}x${size.height}`);
   }
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForFunction(() => window.tileRush.time > 1); // the silent menu preview is running
-  await page.screenshot({ path: 'test-results/01-home.png' }); check('home fits four portrait sizes and the live preview runs');
+  await page.screenshot({ path: 'test-results/01-home.png' }); check('home lists five genres and fits four portrait sizes; live preview runs');
 
+  for (const genre of GENRES) {
+    await openGenre(page, genre);
+    assert.equal(await page.locator('.track').count(), 5); assert.equal(await page.locator('#genre-name').textContent(), genre.name);
+    assert.deepEqual(await page.locator('.track-title').allTextContents(), genre.tracks.map((t) => t.title));
+    for (const size of [{ width: 320, height: 568 }, { width: 390, height: 844 }]) {
+      await page.setViewportSize(size); assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+      const play = await page.locator('#play').boundingBox(); assert.ok(play.height >= 44 && play.y + play.height <= size.height, `play is on screen at ${size.width}x${size.height}`);
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
+    if (genre.id === 'trance') await page.screenshot({ path: 'test-results/02-genre.png' });
+    await tap(page.locator('#back')); await page.locator('.genre').first().waitFor();
+  }
+  check('each genre opens a page with its five tracks, and Play stays reachable');
+
+  await openGenre(page, GENRES[0]);
   await tap(page.locator('.track').nth(1));
   assert.equal(await page.locator('.track').nth(1).getAttribute('aria-pressed'), 'true');
   await page.waitForFunction(() => window.testAudio?.state === 'running'); check('choosing a track starts its audible preview');
@@ -42,7 +63,7 @@ try {
   await tap(page.locator('#play'));
   await page.waitForFunction(() => document.querySelector('#score').textContent !== '0');
   assert.equal(await page.evaluate(() => window.tileRush.mode), 'playing');
-  await page.screenshot({ path: 'test-results/02-gameplay.png' }); check('play starts after a count-in and the first centred tiles score');
+  await page.screenshot({ path: 'test-results/03-gameplay.png' }); check('play starts after a count-in and the first centred tiles score');
 
   await tap(page.locator('#pause'));
   await page.getByRole('heading', { name: 'Paused' }).waitFor();
@@ -59,19 +80,20 @@ try {
 
   // Without steering, the first off-centre tile ends the run. One continue is offered.
   await page.getByRole('heading', { name: 'Missed!' }).waitFor({ timeout: 15000 });
-  await page.screenshot({ path: 'test-results/03-missed.png' });
+  await page.screenshot({ path: 'test-results/04-missed.png' });
   await tap(page.getByRole('button', { name: 'CONTINUE' }));
   await page.waitForFunction(() => window.tileRush.mode === 'playing', null, { timeout: 5000 });
   await page.getByRole('heading', { name: 'Missed!' }).waitFor({ timeout: 15000 });
   assert.equal(await page.getByRole('button', { name: 'CONTINUE' }).count(), 0);
   await page.getByRole('button', { name: 'TRY AGAIN' }).waitFor(); check('a miss ends the run; one continue, then try again');
   await tap(page.getByRole('button', { name: 'Back to tracks' }));
-  assert.match(await page.locator('.best').first().textContent(), /BEST/);
-  await page.reload(); assert.match(await page.locator('.best').first().textContent(), /BEST/); check('personal best survives reload');
+  assert.equal(await page.locator('#genre').isVisible(), true); assert.match(await page.locator('.track[data-id="neon-horizon"] .best').textContent(), /BEST/);
+  await page.reload(); await openGenre(page, GENRES[0]); assert.match(await page.locator('.track[data-id="neon-horizon"] .best').textContent(), /BEST/); check('Back to tracks returns to the genre page; personal best survives reload');
 
   // Play a whole track with real touch input, steering from the read-only clock.
-  const track = TRACKS[Number(process.env.TRACK || 0)], chart = createChart(track), cdp = await context.newCDPSession(page);
-  await tap(page.locator('.track').nth(TRACKS.indexOf(track)));
+  const track = TRACKS.find((t) => t.id === (process.env.TRACK || 'neon-horizon')), chart = createChart(track), cdp = await context.newCDPSession(page);
+  await page.locator('#genre').isVisible() ? await tap(page.locator('#back')) : null;
+  await openTrack(page, track);
   await tap(page.locator('#play'));
   await page.waitForFunction(() => window.tileRush.mode === 'playing');
   let finger = 195; const pxPerLane = 390 * 0.42 / 1.15, touch = (type, x) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y: 640, id: 1 }] });
@@ -93,9 +115,9 @@ try {
   await page.locator('#modal-stars').waitFor({ timeout: 8000 });
   assert.equal(await page.locator('#modal-title').textContent(), track.title);
   assert.equal(await page.locator('#modal-stars i.on').count(), 3);
-  await page.waitForTimeout(700); await page.screenshot({ path: 'test-results/04-result.png' });
+  await page.waitForTimeout(700); await page.screenshot({ path: 'test-results/05-result.png' });
   await tap(page.getByRole('button', { name: 'Back to tracks' }));
-  assert.equal(await page.locator('.track').nth(TRACKS.indexOf(track)).locator('.stars b').textContent(), '★★★'); check(`a complete ${track.title} run with real touch input earns three stars`);
+  assert.equal(await page.locator(`.track[data-id="${track.id}"] .stars b`).textContent(), '★★★'); check(`a complete ${track.title} run with real touch input earns three stars`);
 
   await page.setViewportSize({ width: 740, height: 360 });
   assert.ok(await page.locator('#rotate').isVisible()); check('landscape phones are asked to rotate');
@@ -103,7 +125,7 @@ try {
 
   const silent = await browser.newContext(options), quiet = await silent.newPage(); quiet.on('pageerror', (e) => errors.push(e.message));
   await quiet.addInitScript(() => { delete window.AudioContext; delete window.webkitAudioContext; Object.defineProperty(window, 'localStorage', { get() { throw new Error('denied'); } }); });
-  await quiet.goto(url); await tap(quiet.locator('#play'));
+  await quiet.goto(url); await tap(quiet.locator('.genre').first()); await tap(quiet.locator('#play'));
   await quiet.waitForFunction(() => document.querySelector('#score').textContent !== '0', null, { timeout: 15000 }); check('plays silently without Web Audio or storage');
   await silent.close();
   assert.deepEqual(errors, []); check('no uncaught page errors');

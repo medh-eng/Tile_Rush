@@ -1,6 +1,6 @@
 // Game rules. Pure logic: no DOM, canvas or audio dependencies.
-import { TRACKS, compile } from './songs.js';
-export { TRACKS };
+import { TRACKS, GENRES, compile } from './songs.js';
+export { TRACKS, GENRES };
 
 export const clamp = (x, a = -1, b = 1) => Math.max(a, Math.min(b, x));
 export const TILE_HALF = 0.4;    // half tile width, in lane units (the stage spans -1..1)
